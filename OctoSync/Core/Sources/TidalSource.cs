@@ -13,6 +13,8 @@ public class TidalSource : IPlaylistSource
 {
     private readonly HttpClient _httpClient;
     private readonly TidalOptions _options;
+    private readonly SemaphoreSlim _rateLimitGate = new(1, 1);
+    private DateTimeOffset _nextAllowedRequestUtc = DateTimeOffset.MinValue;
     private string? _accessToken;
 
     public string ProviderName => "Tidal";
@@ -29,6 +31,7 @@ public class TidalSource : IPlaylistSource
     {
         await EnsureAuthenticatedAsync(cancellationToken);
 
+        await ThrottleRequestAsync(cancellationToken);
         var playlistMetaResponse = await _httpClient.GetAsync($"playlists/{externalPlaylistId}", cancellationToken);
         playlistMetaResponse.EnsureSuccessStatusCode();
 
@@ -47,6 +50,7 @@ public class TidalSource : IPlaylistSource
 
         while (!string.IsNullOrEmpty(nextUrl))
         {
+            await ThrottleRequestAsync(cancellationToken);
             var tracksResponse = await _httpClient.GetAsync(nextUrl, cancellationToken);
             tracksResponse.EnsureSuccessStatusCode();
 
@@ -176,6 +180,7 @@ public class TidalSource : IPlaylistSource
             new KeyValuePair<string, string>("grant_type", "client_credentials")
         ]);
 
+        await ThrottleRequestAsync(cancellationToken);
         var response = await authClient.PostAsync("https://auth.tidal.com/v1/oauth2/token", content, cancellationToken);
 
         if (!response.IsSuccessStatusCode)
@@ -188,5 +193,33 @@ public class TidalSource : IPlaylistSource
         _accessToken = json.GetProperty("access_token").GetString();
 
         _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _accessToken);
+    }
+
+    private async Task ThrottleRequestAsync(CancellationToken cancellationToken)
+    {
+        var maxRequestsPerSecond = _options.MaxRequestsPerSecond > 0
+            ? _options.MaxRequestsPerSecond
+            : 1;
+
+        var minInterval = TimeSpan.FromSeconds(1d / maxRequestsPerSecond);
+
+        await _rateLimitGate.WaitAsync(cancellationToken);
+        try
+        {
+            var now = DateTimeOffset.UtcNow;
+
+            if (_nextAllowedRequestUtc > now)
+            {
+                var delay = _nextAllowedRequestUtc - now;
+                await Task.Delay(delay, cancellationToken);
+                now = DateTimeOffset.UtcNow;
+            }
+
+            _nextAllowedRequestUtc = now.Add(minInterval);
+        }
+        finally
+        {
+            _rateLimitGate.Release();
+        }
     }
 }

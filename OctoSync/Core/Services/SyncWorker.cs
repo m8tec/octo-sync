@@ -166,7 +166,7 @@ public class SyncWorker(IServiceScopeFactory scopeFactory, ILogger<SyncWorker> l
 
         foreach (var track in sourceTracks)
         {
-            string? targetId = null;
+            string? targetId;
 
             // First, check if the track already exists in the target playlist using the same matching logic
             var matchingTargetTrack = FindMatchingTargetTrack(track, targetTracks);
