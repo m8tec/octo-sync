@@ -5,6 +5,7 @@ using System.Text.Json.Nodes;
 using Microsoft.Extensions.Options;
 using OctoSync.Core.Configuration;
 using OctoSync.Core.Interfaces;
+using OctoSync.Core.Matching;
 using OctoSync.Core.Models;
 
 namespace OctoSync.Core.Targets;
@@ -129,10 +130,10 @@ public class SubsonicTarget : IPlaylistTarget
 
     public async Task<string?> FindBestMatchAsync(string title, string artist, CancellationToken cancellationToken)
     {
-        title = title.Trim();
-        artist = artist.Trim();
+        var normalizedTitle = TrackMatcher.Normalize(title);
+        var normalizedArtist = TrackMatcher.Normalize(artist);
 
-        var query = Uri.EscapeDataString($"{artist} {title}");
+        var query = Uri.EscapeDataString($"{normalizedArtist} {normalizedTitle}");
         var searchUrl = $"search3{GetAuthParams()}&query={query}&songCount=10";
 
         var response = await _httpClient.GetAsync(searchUrl, cancellationToken);
@@ -158,8 +159,7 @@ public class SubsonicTarget : IPlaylistTarget
             var songId = songNode["id"]?.ToString();
 
             if (!string.IsNullOrEmpty(songId) &&
-                string.Equals(songTitle, title, StringComparison.OrdinalIgnoreCase) &&
-                string.Equals(songArtist, artist, StringComparison.OrdinalIgnoreCase))
+                TrackMatcher.IsTitleAndArtistMatch(normalizedTitle, normalizedArtist, songTitle, songArtist))
             {
                 return songId;
             }

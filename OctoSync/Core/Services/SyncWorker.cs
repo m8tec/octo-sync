@@ -1,6 +1,7 @@
 using Microsoft.Extensions.Options;
 using OctoSync.Core.Configuration;
 using OctoSync.Core.Interfaces;
+using OctoSync.Core.Matching;
 using OctoSync.Core.Models;
 
 namespace OctoSync.Core.Services;
@@ -44,7 +45,22 @@ public class SyncWorker(IServiceScopeFactory scopeFactory, ILogger<SyncWorker> l
 
             foreach (var externalPlaylistId in playlistIds)
             {
-                await ProcessPlaylistAsync(source, externalPlaylistId, target, cancellationToken);
+                try
+                {
+                    await ProcessPlaylistAsync(source, externalPlaylistId, target, cancellationToken);
+                }
+                catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+                {
+                    throw;
+                }
+                catch (Exception ex)
+                {
+                    logger.LogError(
+                        ex,
+                        "Playlist sync failed for {Provider} playlist {Id}. Continuing with next playlist.",
+                        source.ProviderName,
+                        externalPlaylistId);
+                }
             }
         }
     }
@@ -190,7 +206,7 @@ public class SyncWorker(IServiceScopeFactory scopeFactory, ILogger<SyncWorker> l
     {
         foreach (var targetTrack in targetTracks)
         {
-            if (TracksMatch(sourceTrack, targetTrack))
+            if (TrackMatcher.TracksMatch(sourceTrack, targetTrack))
             {
                 return targetTrack;
             }
@@ -199,7 +215,7 @@ public class SyncWorker(IServiceScopeFactory scopeFactory, ILogger<SyncWorker> l
         return null;
     }
 
-    private static int CalculateMatchingPrefixLength(
+    private int CalculateMatchingPrefixLength(
         IReadOnlyList<ResolvedTrack> sourceTracks,
         IReadOnlyList<TrackModel> targetTracks)
     {
@@ -208,8 +224,14 @@ public class SyncWorker(IServiceScopeFactory scopeFactory, ILogger<SyncWorker> l
 
         for (var i = 0; i < minLength; i++)
         {
-            if (!TracksMatch(sourceTracks[i].Track, targetTracks[i]))
+            if (!TrackMatcher.TracksMatch(sourceTracks[i].Track, targetTracks[i]))
             {
+                logger.LogDebug("Mismatch at position {Position}: '{SourceArtist} - {SourceTitle}' vs '{TargetArtist} - {TargetTitle}'",
+                    i,
+                    sourceTracks[i].Track.Artist,
+                    sourceTracks[i].Track.Title,
+                    targetTracks[i].Artist,
+                    targetTracks[i].Title);
                 break;
             }
 
@@ -276,16 +298,5 @@ public class SyncWorker(IServiceScopeFactory scopeFactory, ILogger<SyncWorker> l
         }
 
         return addCount;
-    }
-
-    private static bool TracksMatch(TrackModel sourceTrack, TrackModel targetTrack)
-    {
-        var titleMatch = sourceTrack.Title.Contains(targetTrack.Title, StringComparison.OrdinalIgnoreCase) ||
-                         targetTrack.Title.Contains(sourceTrack.Title, StringComparison.OrdinalIgnoreCase);
-
-        var artistMatch = sourceTrack.Artist.Contains(targetTrack.Artist, StringComparison.OrdinalIgnoreCase) ||
-                          targetTrack.Artist.Contains(sourceTrack.Artist, StringComparison.OrdinalIgnoreCase);
-
-        return titleMatch && artistMatch;
     }
 }
