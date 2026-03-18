@@ -55,11 +55,22 @@ public class SyncWorker(IServiceScopeFactory scopeFactory, ILogger<SyncWorker> l
                 }
                 catch (Exception ex)
                 {
-                    logger.LogError(
-                        ex,
-                        "Playlist sync failed for {Provider} playlist {Id}. Continuing with next playlist.",
-                        source.ProviderName,
-                        externalPlaylistId);
+                    if (IsExpectedOperationalException(ex))
+                    {
+                        logger.LogWarning(
+                            "Playlist sync failed for {Provider} playlist {Id}. Continuing with next playlist. Reason: {Reason}",
+                            source.ProviderName,
+                            externalPlaylistId,
+                            ex.Message);
+                    }
+                    else
+                    {
+                        logger.LogError(
+                            ex,
+                            "Playlist sync failed for {Provider} playlist {Id}. Continuing with next playlist.",
+                            source.ProviderName,
+                            externalPlaylistId);
+                    }
                 }
             }
         }
@@ -288,15 +299,32 @@ public class SyncWorker(IServiceScopeFactory scopeFactory, ILogger<SyncWorker> l
             }
             catch (Exception ex)
             {
-                logger.LogWarning(
-                    ex,
-                    "Failed to add track '{Title}' by '{Artist}' to playlist {PlaylistId}. Continuing with next track.",
-                    resolvedTrack.Track.Title,
-                    resolvedTrack.Track.Artist,
-                    localPlaylistId);
+                if (IsExpectedOperationalException(ex))
+                {
+                    logger.LogWarning(
+                        "Failed to add track '{Title}' by '{Artist}' to playlist {PlaylistId}. Continuing with next track. Reason: {Reason}",
+                        resolvedTrack.Track.Title,
+                        resolvedTrack.Track.Artist,
+                        localPlaylistId,
+                        ex.Message);
+                }
+                else
+                {
+                    logger.LogWarning(
+                        ex,
+                        "Failed to add track '{Title}' by '{Artist}' to playlist {PlaylistId}. Continuing with next track.",
+                        resolvedTrack.Track.Title,
+                        resolvedTrack.Track.Artist,
+                        localPlaylistId);
+                }
             }
         }
 
         return addCount;
+    }
+
+    private static bool IsExpectedOperationalException(Exception ex)
+    {
+        return ex is InvalidOperationException or HttpRequestException;
     }
 }
