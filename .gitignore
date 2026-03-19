@@ -1,6 +1,9 @@
 **/bin/**
 **/obj/**
+**/.DS_Store
 
 appsettings.Development.json
 appsettings.Local.json
 .env
+
+**/*.csv

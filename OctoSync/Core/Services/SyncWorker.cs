@@ -40,8 +40,7 @@ public class SyncWorker(IServiceScopeFactory scopeFactory, ILogger<SyncWorker> l
 
         foreach (var source in sources)
         {
-            if (!_options.PlaylistsToSync.TryGetValue(source.ProviderName, out var playlistIds))
-                continue;
+            var playlistIds = await ResolvePlaylistIdsAsync(source, cancellationToken);
 
             foreach (var externalPlaylistId in playlistIds)
             {
@@ -74,6 +73,29 @@ public class SyncWorker(IServiceScopeFactory scopeFactory, ILogger<SyncWorker> l
                 }
             }
         }
+    }
+
+    private async Task<IReadOnlyList<string>> ResolvePlaylistIdsAsync(IPlaylistSource source, CancellationToken cancellationToken)
+    {
+        if (_options.PlaylistsToSync.TryGetValue(source.ProviderName, out var configuredPlaylistIds))
+        {
+            var configured = configuredPlaylistIds
+                .Where(id => !string.IsNullOrWhiteSpace(id))
+                .ToArray();
+
+            if (configured.Length > 0)
+            {
+                return configured;
+            }
+        }
+
+        if (source is not IPlaylistSourceDiscovery discovery)
+        {
+            return Array.Empty<string>();
+        }
+
+        var discovered = await discovery.GetPlaylistIdsAsync(cancellationToken);
+        return discovered.Where(id => !string.IsNullOrWhiteSpace(id)).ToArray();
     }
 
     private async Task ProcessPlaylistAsync(

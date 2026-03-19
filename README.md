@@ -1,23 +1,19 @@
 # Octo-Sync
 
-Sync selected playlists from TIDAL and ListenBrainz into a Subsonic-compatible server (for example Navidrome).
+Sync selected playlists from music services into a Subsonic-compatible server (for example Navidrome).
 
-Octo-Sync runs as a small background worker. On every cycle, it fetches configured source playlists, resolves tracks in the target library, and updates the target playlist order.
+Octo-Sync runs as a small background worker. On every cycle, it fetches configured source playlists, resolves tracks in the target library, and updates the target playlist.
 
-Octo-Sync is intended to be used with [Octo-Fiesta](https://github.com/V1ck3s/octo-fiesta), a Subsonic API proxy server that integrates multiple music streaming providers as sources.
+If used used with [Octo-Fiesta](https://github.com/V1ck3s/octo-fiesta), a Subsonic API proxy server that integrates multiple music streaming providers as sources, Octo-Sync will trigger downloads of tracks that are not yet downloaded to the local library.
 
-## What it does
-
-- Pulls playlists from:
-  - TIDAL (by playlist ID)
-  - ListenBrainz (currently `daily-jams` and `weekly-exploration` keys)
-- Pushes to Subsonic/Navidrome playlists
-- Keeps playlist order aligned with the source
-- Uses fuzzy title/artist matching plus search fallback
+## Supported sources
+- TIDAL playlists
+- ListenBrainz user-based playlists
+- CSV playlist exports
 
 ## Requirements
 
-- Docker + Docker Compose (recommended)
+- Docker Compose (recommended)
 - A running Subsonic-compatible server (Navidrome works)
 - Credentials of the source playlist providers you want to sync from
 
@@ -47,6 +43,14 @@ All runtime configuration is supplied through environment variables in `.env`.
 
 **TIDAL**: You need to create an app in the [TIDAL developers portal](https://developer.tidal.com/dashboard) to get a client ID and secret.
 **ListenBrainz**: You can get your user token from the [ListenBrainz settings](https://listenbrainz.org/settings/).
+
+### CSV playlists
+
+- Put playlist export files into `./playlists` (or set `CSV_MOUNT_PATH` / `CSV_BASE_PATH` differently).
+- All `.csv` files in the configured folder are imported automatically.
+- Supported are common CSV layouts with differing column names/order and delimiters.
+- Required fields are title and artist (for example `Track Name` + `Artist Name(s)`).
+- Supported exporters: [Exportify](https://exportify.net/) (Spotify)
 
 ## Contributing
 

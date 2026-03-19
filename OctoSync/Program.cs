@@ -9,9 +9,11 @@ var builder = Host.CreateApplicationBuilder(args);
 builder.Logging.ClearProviders();
 builder.Logging.AddConsole();
 
+builder.Services.Configure<CsvOptions>(builder.Configuration.GetSection("Sources:Csv"));
 builder.Services.Configure<TidalOptions>(builder.Configuration.GetSection("Sources:Tidal"));
 builder.Services.Configure<ListenBrainzOptions>(builder.Configuration.GetSection("Sources:ListenBrainz"));
 
+builder.Services.AddTransient<IPlaylistSource, CsvSource>();
 builder.Services.AddHttpClient<IPlaylistSource, TidalSource>();
 builder.Services.AddHttpClient<IPlaylistSource, ListenBrainzSource>();
 
