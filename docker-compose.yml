@@ -17,11 +17,20 @@ services:
       Sources__Tidal__ClientId: ${TIDAL_CLIENT_ID}
       Sources__Tidal__ClientSecret: ${TIDAL_CLIENT_SECRET}
       Sources__Tidal__MaxRequestsPerSecond: ${TIDAL_MAX_REQUESTS_PER_SECOND:-1}
+      Sources__Deezer__AccessToken: ${DEEZER_ACCESS_TOKEN}
+      Sources__Deezer__MaxRequestsPerSecond: ${DEEZER_MAX_REQUESTS_PER_SECOND:-1}
       Sources__ListenBrainz__BaseUrl: ${LISTENBRAINZ_BASE_URL:-https://api.listenbrainz.org/1/}
       Sources__ListenBrainz__UserName: ${LISTENBRAINZ_USERNAME}
       Sources__ListenBrainz__UserToken: ${LISTENBRAINZ_TOKEN}
       Sources__ListenBrainz__UserAgent: ${LISTENBRAINZ_USER_AGENT:-OctoSync/1.0}
       SyncSettings__IntervalMinutes: ${SYNC_INTERVAL_MINUTES:-10}
+      SyncSettings__PlaylistsToSync__Deezer__0: ${DEEZER_PLAYLIST_0}
+      SyncSettings__PlaylistsToSync__Deezer__1: ${DEEZER_PLAYLIST_1}
+      SyncSettings__PlaylistsToSync__Deezer__2: ${DEEZER_PLAYLIST_2}
+      SyncSettings__PlaylistsToSync__Deezer__3: ${DEEZER_PLAYLIST_3}
+      SyncSettings__PlaylistsToSync__Deezer__4: ${DEEZER_PLAYLIST_4}
+      SyncSettings__PlaylistsToSync__Deezer__5: ${DEEZER_PLAYLIST_5}
+      SyncSettings__PlaylistsToSync__Deezer__6: ${DEEZER_PLAYLIST_6}
       SyncSettings__PlaylistsToSync__Tidal__0: ${TIDAL_PLAYLIST_0}
       SyncSettings__PlaylistsToSync__Tidal__1: ${TIDAL_PLAYLIST_1}
       SyncSettings__PlaylistsToSync__Tidal__2: ${TIDAL_PLAYLIST_2}

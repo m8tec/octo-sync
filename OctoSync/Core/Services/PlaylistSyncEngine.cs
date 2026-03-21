@@ -90,15 +90,16 @@ public class PlaylistSyncEngine(
         int matchingPrefixLength,
         CancellationToken cancellationToken)
     {
-        logger.LogInformation("Removing {RemoveCount} tracks from target playlist starting at index {StartIndex}...", targetTrackCount - matchingPrefixLength, matchingPrefixLength
+        int removeCount = targetTrackCount - matchingPrefixLength;
+        logger.LogInformation("Removing {RemoveCount} tracks from target playlist after position {StartIndex}...", removeCount, matchingPrefixLength
         );
-        var removeCount = 0;
+
         for (var i = targetTrackCount - 1; i >= matchingPrefixLength; i--)
         {
             logger.LogDebug("Removing track at index {Index} from playlist {PlaylistId}", i, localPlaylistId);
             await target.RemoveTrackAsync(localPlaylistId, i.ToString(), cancellationToken);
-            removeCount++;
         }
+
         return removeCount;
     }
 
