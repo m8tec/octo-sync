@@ -78,7 +78,7 @@ public class TidalSource : IPlaylistSource
 
                     tracks.Add(new TrackModel
                     {
-                        Id = $"ext-tidal-{trackId}",
+                        Id = trackId,
                         Title = title,
                         Artist = artistName,
                         Isrc = isrc

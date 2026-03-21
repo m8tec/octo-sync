@@ -128,12 +128,12 @@ public class PlaylistSyncEngine(
             }
             catch (Exception ex) when (ex is InvalidOperationException or HttpRequestException)
             {
-                logger.LogWarning("Failed to add track '{Title}' by '{Artist}' to playlist {PlaylistId}. Continuing with next track. Reason: {Reason}",
+                logger.LogWarning("Failed to add track '{Title}' by '{Artist}' to playlist {PlaylistId}. Reason: {Reason}",
                     resolvedTrack.Track.Title, resolvedTrack.Track.Artist, localPlaylistId, ex.Message);
             }
             catch (Exception ex)
             {
-                logger.LogWarning(ex, "Failed to add track '{Title}' by '{Artist}' to playlist {PlaylistId}. Continuing with next track.",
+                logger.LogWarning(ex, "Failed to add track '{Title}' by '{Artist}' to playlist {PlaylistId}.",
                     resolvedTrack.Track.Title, resolvedTrack.Track.Artist, localPlaylistId);
             }
         }

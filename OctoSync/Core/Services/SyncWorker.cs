@@ -30,6 +30,13 @@ public class SyncWorker(
             {
                 logger.LogError(ex, "An error occurred during the sync cycle.");
             }
+
+            if (!stoppingToken.IsCancellationRequested)
+            {
+                logger.LogInformation(
+                    "Sync cycle finished. Waiting {Minutes} minute(s) for the next cycle.",
+                    _options.IntervalMinutes);
+            }
         }
         while (await timer.WaitForNextTickAsync(stoppingToken));
     }
