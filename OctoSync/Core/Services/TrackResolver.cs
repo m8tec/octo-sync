@@ -36,7 +36,7 @@ public class TrackResolver(ILogger<TrackResolver> logger) : ITrackResolver
             }
             else
             {
-                logger.LogWarning("Skipping unresolved source track for this run: '{Title}' by '{Artist}'.",
+                logger.LogWarning("Skipping unresolved source track: '{Title}' by '{Artist}'.",
                     track.Title, track.Artist);
                 unresolvedCount++;
             }
@@ -44,7 +44,7 @@ public class TrackResolver(ILogger<TrackResolver> logger) : ITrackResolver
 
         if (unresolvedCount > 0)
         {
-            logger.LogInformation("Filtered out {UnresolvedCount} unresolved source tracks for this sync run.", unresolvedCount);
+            logger.LogInformation("Filtered out {UnresolvedCount} unresolved source tracks.", unresolvedCount);
         }
 
         return (resolvedTracks, unresolvedCount);

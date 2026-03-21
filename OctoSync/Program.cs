@@ -19,12 +19,14 @@ builder.Services.AddSerilog(config => config
 
 builder.Services.Configure<CsvOptions>(builder.Configuration.GetSection("Sources:Csv"));
 builder.Services.Configure<TidalOptions>(builder.Configuration.GetSection("Sources:Tidal"));
+builder.Services.Configure<DeezerOptions>(builder.Configuration.GetSection("Sources:Deezer"));
 builder.Services.Configure<ListenBrainzOptions>(builder.Configuration.GetSection("Sources:ListenBrainz"));
 builder.Services.Configure<SubsonicOptions>(builder.Configuration.GetSection("Subsonic"));
 builder.Services.Configure<SyncOptions>(builder.Configuration.GetSection("SyncSettings"));
 
 builder.Services.AddTransient<IPlaylistSource, CsvSource>();
 builder.Services.AddHttpClient<IPlaylistSource, TidalSource>();
+builder.Services.AddHttpClient<IPlaylistSource, DeezerSource>();
 builder.Services.AddHttpClient<IPlaylistSource, ListenBrainzSource>();
 
 builder.Services.AddHttpClient<IPlaylistTarget, SubsonicTarget>(client =>

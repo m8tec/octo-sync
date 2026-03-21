@@ -8,6 +8,7 @@ If used used with [Octo-Fiesta](https://github.com/V1ck3s/octo-fiesta), a Subson
 
 ## Supported sources
 - TIDAL playlists
+- Deezer playlists
 - ListenBrainz user-based playlists
 - CSV playlist exports
 
@@ -42,6 +43,7 @@ All runtime configuration is supplied through environment variables in `.env`.
 ### Getting Credentials
 
 **TIDAL**: You need to create an app in the [TIDAL developers portal](https://developer.tidal.com/dashboard) to get a client ID and secret.
+**Deezer**: Public playlists work without a token. For private/restricted access, provide a Deezer user `access_token`.
 **ListenBrainz**: You can get your user token from the [ListenBrainz settings](https://listenbrainz.org/settings/).
 
 ### CSV playlists
