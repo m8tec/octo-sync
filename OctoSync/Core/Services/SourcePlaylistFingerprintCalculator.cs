@@ -10,6 +10,11 @@ public static class SourcePlaylistFingerprintCalculator
     {
         var builder = new StringBuilder();
 
+        builder.Append(Normalize(sourcePlaylist.Name));
+        builder.Append('|');
+        builder.Append(Normalize(sourcePlaylist.Description));
+        builder.Append('\n');
+
         foreach (var track in sourcePlaylist.Tracks)
         {
             var identifier = string.IsNullOrWhiteSpace(track.Id)

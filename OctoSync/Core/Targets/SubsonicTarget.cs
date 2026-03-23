@@ -58,7 +58,9 @@ public class SubsonicTarget : IPlaylistTarget
                 var name = p["name"]?.ToString();
                 if (string.Equals(name, playlist.Name, StringComparison.OrdinalIgnoreCase))
                 {
-                    return p["id"]!.ToString();
+                    var existingId = p["id"]!.ToString();
+                    await UpdatePlaylistMetadataAsync(existingId, playlist.Description, cancellationToken);
+                    return existingId;
                 }
             }
         }
@@ -73,7 +75,17 @@ public class SubsonicTarget : IPlaylistTarget
         if (string.IsNullOrEmpty(newId))
             throw new Exception("Failed to create playlist or parse the new ID from Navidrome.");
 
+        await UpdatePlaylistMetadataAsync(newId, playlist.Description, cancellationToken);
+
         return newId;
+    }
+
+    private async Task UpdatePlaylistMetadataAsync(string playlistId, string? description, CancellationToken cancellationToken)
+    {
+        var encodedComment = Uri.EscapeDataString(description ?? string.Empty);
+        var updateUrl = $"updatePlaylist{GetAuthParams()}&playlistId={playlistId}&comment={encodedComment}";
+        var response = await _httpClient.GetAsync(updateUrl, cancellationToken);
+        response.EnsureSuccessStatusCode();
     }
 
     public async Task<PlaylistModel> GetTargetPlaylistAsync(string localPlaylistId, CancellationToken cancellationToken)
