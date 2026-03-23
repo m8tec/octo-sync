@@ -18,6 +18,15 @@ If used used with [Octo-Fiesta](https://github.com/V1ck3s/octo-fiesta), a Subson
 - A running Subsonic-compatible server (Navidrome works)
 - Credentials of the source playlist providers you want to sync from
 
+## ⚠️ Important: Temporary Setup Requirement
+Until [PR#179](https://github.com/V1ck3s/octo-fiesta/pull/179)  is merged into the `main` branch of Octo-Fiesta, you **must** use the development image of it.
+
+In Octo-Fiesta's docker-compose.yml, update the image line to:
+```yaml
+image: ghcr.io/v1ck3s/octo-fiesta:dev
+```
+
+
 ### Docker Installation
 
 ```bash
