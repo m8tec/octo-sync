@@ -343,12 +343,21 @@ public sealed class SpotifySource : IPlaylistSource
     private static async Task<string?> TryGetPlaylistNameAsync(IPage page)
     {
         const string script = @"() => {
-            const h1 = document.querySelector('h1');
-            if (h1 && h1.textContent) return h1.textContent.trim();
+            const selectors = [
+                '[data-testid=""playlist-page""] h1',
+                '[data-testid=""entityTitle""] h1',
+                'h1'
+            ];
 
-            const meta = document.querySelector('meta[property=""og:title""]');
-            const content = meta?.getAttribute('content');
-            return content ? content.trim() : null;
+            for (const selector of selectors) {
+                const el = document.querySelector(selector);
+                const name = el?.textContent?.trim();
+                if (name) {
+                    return name;
+                }
+            }
+
+            return null;
         }";
 
         return await page.EvaluateAsync<string?>(script);
