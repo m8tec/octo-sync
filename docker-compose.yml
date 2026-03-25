@@ -31,6 +31,13 @@ services:
       SyncSettings__PlaylistsToSync__Deezer__4: ${DEEZER_PLAYLIST_4}
       SyncSettings__PlaylistsToSync__Deezer__5: ${DEEZER_PLAYLIST_5}
       SyncSettings__PlaylistsToSync__Deezer__6: ${DEEZER_PLAYLIST_6}
+      SyncSettings__PlaylistsToSync__Spotify__0: ${SPOTIFY_PLAYLIST_0}
+      SyncSettings__PlaylistsToSync__Spotify__1: ${SPOTIFY_PLAYLIST_1}
+      SyncSettings__PlaylistsToSync__Spotify__2: ${SPOTIFY_PLAYLIST_2}
+      SyncSettings__PlaylistsToSync__Spotify__3: ${SPOTIFY_PLAYLIST_3}
+      SyncSettings__PlaylistsToSync__Spotify__4: ${SPOTIFY_PLAYLIST_4}
+      SyncSettings__PlaylistsToSync__Spotify__5: ${SPOTIFY_PLAYLIST_5}
+      SyncSettings__PlaylistsToSync__Spotify__6: ${SPOTIFY_PLAYLIST_6}
       SyncSettings__PlaylistsToSync__Tidal__0: ${TIDAL_PLAYLIST_0}
       SyncSettings__PlaylistsToSync__Tidal__1: ${TIDAL_PLAYLIST_1}
       SyncSettings__PlaylistsToSync__Tidal__2: ${TIDAL_PLAYLIST_2}
