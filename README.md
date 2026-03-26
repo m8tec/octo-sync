@@ -63,18 +63,6 @@ All runtime configuration is supplied through environment variables in `.env`.
 - Required fields are title and artist (for example `Track Name` + `Artist Name(s)`).
 - Supported exporters: [Exportify](https://exportify.net/) (Spotify)
 
-## Contributing
-
-Contributions are welcome!
-
-```bash
-cd OctoSync
-dotnet build
-dotnet run
-```
-
-Set the same config values in `appsettings.Development.json`.
-
 ## License
 
 GPL-3.0
