@@ -5,6 +5,10 @@ on:
     branches:
       - main
       - dev
+  pull_request:
+    branches:
+      - main
+      - dev
   workflow_dispatch:
 
 permissions:
@@ -40,14 +44,15 @@ jobs:
           tags: |
             type=raw,value=latest,enable=${{ github.ref == 'refs/heads/main' }}
             type=raw,value=dev,enable=${{ github.ref == 'refs/heads/dev' }}
-            type=sha,prefix={{branch}}-
+            type=ref,event=pr
+            type=sha
 
       - name: Build and push
         uses: docker/build-push-action@v6
         with:
           context: ./OctoSync
           file: ./OctoSync/Dockerfile
-          push: true
+          push: ${{ github.event_name != 'pull_request' }} 
           platforms: linux/amd64,linux/arm64
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
