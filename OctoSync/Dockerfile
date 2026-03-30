@@ -1,6 +1,8 @@
 FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 WORKDIR /src
 
+ENV PLAYWRIGHT_BROWSERS_PATH=/ms-playwright
+
 COPY ["OctoSync.csproj", "./"]
 RUN dotnet restore "OctoSync.csproj"
 
@@ -14,8 +16,10 @@ RUN dotnet tool install --global Microsoft.Playwright.CLI && \
 FROM mcr.microsoft.com/dotnet/runtime:10.0 AS final
 WORKDIR /app
 
+ENV PLAYWRIGHT_BROWSERS_PATH=/ms-playwright
+
 COPY --from=build /app/publish .
-COPY --from=build /root/.cache/ms-playwright /root/.cache/ms-playwright
+COPY --from=build /ms-playwright /ms-playwright
 
 # Install Chromium runtime dependencies
 RUN apt-get update && \
@@ -48,6 +52,7 @@ RUN apt-get update && \
 		libxtst6 \
 		libnss3 \
 		libnspr4 && \
+	chmod -R a+rX /ms-playwright && \
 	apt-get clean && \
 	rm -rf /var/lib/apt/lists/*
 
