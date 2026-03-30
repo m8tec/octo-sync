@@ -7,9 +7,11 @@ Octo-Sync runs as a small background worker. On every cycle, it fetches configur
 If used used with [Octo-Fiesta](https://github.com/V1ck3s/octo-fiesta), a Subsonic API proxy server that integrates multiple music streaming providers as sources, Octo-Sync will trigger downloads of tracks that are not yet downloaded to the local library.
 
 ## Supported sources
-- TIDAL playlists
 - Deezer playlists
 - ListenBrainz user-based playlists
+- Spotify playlists
+- TIDAL playlists
+- YouTube Music playlists
 - CSV playlist exports
 
 ## Requirements
