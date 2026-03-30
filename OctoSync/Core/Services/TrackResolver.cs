@@ -1,6 +1,7 @@
 using OctoSync.Core.Interfaces;
 using OctoSync.Core.Matching;
 using OctoSync.Core.Models;
+using System.Text;
 
 namespace OctoSync.Core.Services;
 
@@ -28,6 +29,25 @@ public class TrackResolver(ILogger<TrackResolver> logger) : ITrackResolver
             else
             {
                 targetId = await target.FindBestMatchAsync(track.Title, track.Artist, cancellationToken);
+
+                // Fallback: If no match was found, try searching without any bracketed content.
+                // Especially useful for YouTube Music where titles often contain extra info for the video.
+                if (string.IsNullOrEmpty(targetId))
+                {
+                    var simplifiedTitle = RemoveBracketedContent(track.Title);
+                    if (!string.Equals(simplifiedTitle, track.Title, StringComparison.Ordinal))
+                    {
+                        targetId = await target.FindBestMatchAsync(simplifiedTitle, track.Artist, cancellationToken);
+
+                        if (!string.IsNullOrEmpty(targetId))
+                        {
+                            logger.LogDebug(
+                                "Resolved track '{Title}' via fallback title normalization to '{SimplifiedTitle}'.",
+                                track.Title,
+                                simplifiedTitle);
+                        }
+                    }
+                }
             }
 
             if (!string.IsNullOrEmpty(targetId))
@@ -61,5 +81,55 @@ public class TrackResolver(ILogger<TrackResolver> logger) : ITrackResolver
         }
 
         return null;
+    }
+
+    private static string RemoveBracketedContent(string title)
+    {
+        if (string.IsNullOrWhiteSpace(title))
+        {
+            return string.Empty;
+        }
+
+        var builder = new StringBuilder(title.Length);
+        var roundDepth = 0;
+        var squareDepth = 0;
+
+        foreach (var ch in title)
+        {
+            if (ch == '(')
+            {
+                roundDepth++;
+                continue;
+            }
+
+            if (ch == ')')
+            {
+                roundDepth = Math.Max(0, roundDepth - 1);
+                continue;
+            }
+
+            if (ch == '[')
+            {
+                squareDepth++;
+                continue;
+            }
+
+            if (ch == ']')
+            {
+                squareDepth = Math.Max(0, squareDepth - 1);
+                continue;
+            }
+
+            if (roundDepth == 0 && squareDepth == 0)
+            {
+                builder.Append(ch);
+            }
+        }
+
+        var collapsed = string.Join(' ', builder
+            .ToString()
+            .Split(' ', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries));
+
+        return collapsed.Trim('-', ' ', ',', '.', ';', ':');
     }
 }
