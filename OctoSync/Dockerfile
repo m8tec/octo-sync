@@ -56,6 +56,9 @@ RUN apt-get update && \
 	apt-get clean && \
 	rm -rf /var/lib/apt/lists/*
 
+# Set folder permissions recursively
+RUN chmod 755 -R /app
+
 ENV DOTNET_ENVIRONMENT=Production
 
 ENTRYPOINT ["dotnet", "OctoSync.dll"]
