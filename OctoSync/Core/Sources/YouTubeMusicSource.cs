@@ -38,7 +38,7 @@ public sealed class YouTubeMusicSource : IPlaylistSource
         var tracks = new List<TrackModel>();
         await foreach (var song in songs.WithCancellation(cancellationToken))
         {
-            var artist = song.Artists?.FirstOrDefault()?.Name;
+            var artist = song.Artists.FirstOrDefault()?.Name;
             if (string.IsNullOrWhiteSpace(song.Id) || string.IsNullOrWhiteSpace(song.Name) || string.IsNullOrWhiteSpace(artist))
             {
                 continue;
