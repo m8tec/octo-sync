@@ -1,0 +1,7 @@
+services:
+  octosync:
+    image: octo-sync:local
+    pull_policy: never
+    build:
+      context: ./OctoSync
+      dockerfile: Dockerfile

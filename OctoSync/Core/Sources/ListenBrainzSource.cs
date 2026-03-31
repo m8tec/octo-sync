@@ -4,6 +4,7 @@ using Microsoft.Extensions.Options;
 using OctoSync.Core.Configuration;
 using OctoSync.Core.Interfaces;
 using OctoSync.Core.Models;
+using OctoSync.Core.Utilities;
 
 namespace OctoSync.Core.Sources;
 
@@ -45,11 +46,17 @@ public sealed class ListenBrainzSource : IPlaylistSource
 
         var tracks = ParseTracks(playlistNode["track"]?.AsArray());
 
+        var description = playlistNode["annotation"]?.ToString();
+        if (!string.IsNullOrWhiteSpace(description))
+        {
+            description = HtmlTextCleaner.StripHtmlTags(description);
+        }
+
         return new PlaylistModel
         {
             ExternalId = externalPlaylistId,
             Name = GetStablePlaylistName(sourcePatch),
-            Description = playlistNode["annotation"]?.ToString(),
+            Description = description,
             Tracks = tracks
         };
     }

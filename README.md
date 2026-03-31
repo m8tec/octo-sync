@@ -1,24 +1,31 @@
 # Octo-Sync
 
-Sync selected playlists from music services into a Subsonic-compatible server (for example Navidrome).
+Sync selected playlists from music services into a Subsonic-compatible server (for example Navidrome), with support for downloading missing tracks if used with the Subsonic API proxy server [Octo-Fiesta](https://github.com/V1ck3s/octo-fiesta).
 
-Octo-Sync runs as a small background worker. On every cycle, it fetches configured source playlists, resolves tracks in the target library, and updates the target playlist.
+On every cycle, Octo-Sync fetches configured source playlists, resolves tracks in the target library, and updates the target playlist.
 
-If used used with [Octo-Fiesta](https://github.com/V1ck3s/octo-fiesta), a Subsonic API proxy server that integrates multiple music streaming providers as sources, Octo-Sync will trigger downloads of tracks that are not yet downloaded to the local library.
+### Supported Playlist Sources
+| Source         | Credentials required       | Private playlists |
+|----------------|----------------------------|-------------------|
+| Deezer         | No                         | No                |
+| ListenBrainz   | Yes                        | Yes               |
+| Qobuz          | No                         | No                |
+| Spotify        | No                         | No                |
+| TIDAL          | Yes                        | Yes               |
+| YouTube Music  | No                         | No                |
+| Csv files      | No                         | No                |
 
-## Supported sources
-- TIDAL playlists
-- Deezer playlists
-- ListenBrainz user-based playlists
-- CSV playlist exports
+See the [Supported Playlist Sources](https://github.com/m8tec/octo-sync/wiki/Supported-Playlist-Sources) wiki page for detailed information.
 
-## Requirements
+## Quick Start
+
+### Requirements
 
 - Docker Compose (recommended)
-- A running Subsonic-compatible server (Navidrome works)
-- Credentials of the source playlist providers you want to sync from
+- A running Navidrome instance
+- Playlists you want to mirror :)
 
-## ⚠️ Important: Temporary Setup Requirement
+### ⚠️ Important: Temporary Setup Requirement
 Until [PR#179](https://github.com/V1ck3s/octo-fiesta/pull/179)  is merged into the `main` branch of Octo-Fiesta, you **must** use the development image of it.
 
 In Octo-Fiesta's docker-compose.yml, update the image line to:
@@ -27,7 +34,7 @@ image: ghcr.io/v1ck3s/octo-fiesta:dev
 ```
 
 
-### Docker Installation
+### Docker Installation (Recommended)
 
 ```bash
 # Clone the repository
@@ -45,35 +52,13 @@ docker-compose up -d
 docker-compose logs -f
 ```
 
+See the [Installation](https://github.com/m8tec/octo-sync/wiki/Installation) wiki page for detailed instructions.
+
 ## Configuration
 
 All runtime configuration is supplied through environment variables in `.env`.
 
-### Getting Credentials
-
-**TIDAL**: You need to create an app in the [TIDAL developers portal](https://developer.tidal.com/dashboard) to get a client ID and secret.
-**Deezer**: Public playlists work without a token. For private/restricted access, provide a Deezer user `access_token`.
-**ListenBrainz**: You can get your user token from the [ListenBrainz settings](https://listenbrainz.org/settings/).
-
-### CSV playlists
-
-- Put playlist export files into `./playlists` (or set `CSV_MOUNT_PATH` / `CSV_BASE_PATH` differently).
-- All `.csv` files in the configured folder are imported automatically.
-- Supported are common CSV layouts with differing column names/order and delimiters.
-- Required fields are title and artist (for example `Track Name` + `Artist Name(s)`).
-- Supported exporters: [Exportify](https://exportify.net/) (Spotify)
-
-## Contributing
-
-Contributions are welcome!
-
-```bash
-cd OctoSync
-dotnet build
-dotnet run
-```
-
-Set the same config values in `appsettings.Development.json`.
+For the playlist configuration, see the [Supported Playlist Sources](https://github.com/m8tec/octo-sync/wiki/Supported-Playlist-Sources) wiki page.
 
 ## License
 
@@ -81,6 +66,5 @@ GPL-3.0
 
 ## Acknowledgments
 
-- [Octo-Fiesta](https://github.com/V1ck3s/octo-fiesta) - The Subsonic API proxy server that inspired this project
+- [Octo-Fiesta](https://github.com/V1ck3s/octo-fiesta) - The Subsonic API proxy server that led me to create Octo-Sync in the first place and heavily inspired it
 - [Navidrome](https://www.navidrome.org/) - The excellent self-hosted music server
-- [Subsonic API](http://www.subsonic.org/pages/api.jsp) - The API specification
