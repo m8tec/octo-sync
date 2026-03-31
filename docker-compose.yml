@@ -32,6 +32,13 @@ services:
       SyncSettings__PlaylistsToSync__Deezer__4: ${DEEZER_PLAYLIST_4}
       SyncSettings__PlaylistsToSync__Deezer__5: ${DEEZER_PLAYLIST_5}
       SyncSettings__PlaylistsToSync__Deezer__6: ${DEEZER_PLAYLIST_6}
+      SyncSettings__PlaylistsToSync__Qobuz__0: ${QOBUZ_PLAYLIST_0}
+      SyncSettings__PlaylistsToSync__Qobuz__1: ${QOBUZ_PLAYLIST_1}
+      SyncSettings__PlaylistsToSync__Qobuz__2: ${QOBUZ_PLAYLIST_2}
+      SyncSettings__PlaylistsToSync__Qobuz__3: ${QOBUZ_PLAYLIST_3}
+      SyncSettings__PlaylistsToSync__Qobuz__4: ${QOBUZ_PLAYLIST_4}
+      SyncSettings__PlaylistsToSync__Qobuz__5: ${QOBUZ_PLAYLIST_5}
+      SyncSettings__PlaylistsToSync__Qobuz__6: ${QOBUZ_PLAYLIST_6}
       SyncSettings__PlaylistsToSync__Spotify__0: ${SPOTIFY_PLAYLIST_0}
       SyncSettings__PlaylistsToSync__Spotify__1: ${SPOTIFY_PLAYLIST_1}
       SyncSettings__PlaylistsToSync__Spotify__2: ${SPOTIFY_PLAYLIST_2}

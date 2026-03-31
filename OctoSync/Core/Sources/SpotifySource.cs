@@ -8,31 +8,22 @@ using System.Text.RegularExpressions;
 
 namespace OctoSync.Core.Sources;
 
-public sealed class SpotifySource : IPlaylistSource
+public sealed class SpotifySource(HttpClient httpClient, IOptions<SpotifyOptions> options, ILogger<SpotifySource> logger) : IPlaylistSource
 {
-    private readonly HttpClient _httpClient;
-    private readonly SpotifyOptions _options;
-    private readonly ILogger<SpotifySource> _logger;
+    private readonly SpotifyOptions _options = options.Value;
 
     public string ProviderName => "Spotify";
-
-    public SpotifySource(HttpClient httpClient, IOptions<SpotifyOptions> options, ILogger<SpotifySource> logger)
-    {
-        _httpClient = httpClient;
-        _options = options.Value;
-        _logger = logger;
-    }
 
     public async Task<PlaylistModel> GetPlaylistAsync(string playlistId, CancellationToken cancellationToken)
     {
         var playlistUrl = $"https://open.spotify.com/playlist/{playlistId}";
 
-        _logger.LogDebug("Fetching Spotify playlist: {PlaylistUrl}", playlistUrl);
+        logger.LogDebug("Fetching Spotify playlist: {PlaylistUrl}", playlistUrl);
         
         var expectedTrackCount = await TryFetchExpectedTrackCountAsync(playlistId, cancellationToken);
         if (expectedTrackCount.HasValue)
         {
-            _logger.LogDebug("Expected track count for playlist {PlaylistId}: {Count}", playlistId, expectedTrackCount.Value);
+            logger.LogDebug("Expected track count for playlist {PlaylistId}: {Count}", playlistId, expectedTrackCount.Value);
         }
 
         return await FetchPlaylistViaPlaywrightAsync(playlistId, playlistUrl, expectedTrackCount, cancellationToken);
@@ -46,7 +37,7 @@ public sealed class SpotifySource : IPlaylistSource
             using var cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
             cts.CancelAfter(TimeSpan.FromSeconds(15));
 
-            var response = await _httpClient.GetAsync(url, cts.Token);
+            var response = await httpClient.GetAsync(url, cts.Token);
             if (!response.IsSuccessStatusCode)
             {
                 return null;
@@ -65,7 +56,7 @@ public sealed class SpotifySource : IPlaylistSource
         }
         catch (Exception ex)
         {
-            _logger.LogDebug(ex, "Failed to fetch expected track count from meta tags");
+            logger.LogDebug(ex, "Failed to fetch expected track count from meta tags");
             return null;
         }
     }
@@ -104,7 +95,7 @@ public sealed class SpotifySource : IPlaylistSource
         }
         catch
         {
-            _logger.LogWarning("Tracklist selector not found, proceeding anyway");
+            logger.LogWarning("Tracklist selector not found, proceeding anyway");
         }
 
         var playlistName = await TryGetPlaylistNameAsync(page);
@@ -128,7 +119,7 @@ public sealed class SpotifySource : IPlaylistSource
                     
             if ((DateTime.UtcNow - lastProgressTime).TotalSeconds > 5)
             {
-                _logger.LogInformation(
+                logger.LogInformation(
                     "Spotify playlist loading: {CurrentCount}/{ExpectedCount} tracks",
                     currentCount,
                     expectedTrackCount?.ToString() ?? "unknown");
@@ -137,14 +128,14 @@ public sealed class SpotifySource : IPlaylistSource
 
             if (currentCount >= expectedTrackCount)
             {
-                _logger.LogDebug("Reached expected track count: {TrackCount}", currentCount);
+                logger.LogDebug("Reached expected track count: {TrackCount}", currentCount);
                 break;
             }
 
             var timeSinceLastProgress = DateTime.UtcNow - lastProgressTime;
             if (timeSinceLastProgress.TotalSeconds > stallTimeoutSeconds)
             {
-                _logger.LogInformation("Stall timeout reached after {Seconds}s with {TrackCount} tracks",
+                logger.LogInformation("Stall timeout reached after {Seconds}s with {TrackCount} tracks",
                     stallTimeoutSeconds, currentCount);
                 break;
             }
@@ -176,7 +167,7 @@ public sealed class SpotifySource : IPlaylistSource
 
         var tracks = seenTracksByIndex.Values.ToList();
 
-        _logger.LogInformation(
+        logger.LogInformation(
             "Successfully loaded {TrackCount} tracks from Spotify playlist (expected: {ExpectedCount})",
             tracks.Count,
             expectedTrackCount?.ToString() ?? "unknown");
@@ -213,14 +204,14 @@ public sealed class SpotifySource : IPlaylistSource
                 if (!await button.IsVisibleAsync())
                     continue;
 
-                _logger.LogDebug("Found cookie button with selector: {Selector}", selector);
+                logger.LogDebug("Found cookie button with selector: {Selector}", selector);
                 await button.ClickAsync(new ElementHandleClickOptions { Force = true, Timeout = 2000 });
                 await Task.Delay(500);
                 break;
             }
             catch (Exception ex)
             {
-                _logger.LogDebug(ex, "Cookie selector {Selector} failed", selector);
+                logger.LogDebug(ex, "Cookie selector {Selector} failed", selector);
             }
         }
     }
@@ -330,13 +321,13 @@ public sealed class SpotifySource : IPlaylistSource
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogDebug(ex, "Error parsing extracted track");
+                    logger.LogDebug(ex, "Error parsing extracted track");
                 }
             }
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error extracting visible tracks from Spotify page");
+            logger.LogError(ex, "Error extracting visible tracks from Spotify page");
         }
     }
 
