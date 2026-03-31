@@ -9,6 +9,7 @@ If used used with [Octo-Fiesta](https://github.com/V1ck3s/octo-fiesta), a Subson
 ## Supported sources
 - Deezer playlists
 - ListenBrainz user-based playlists
+- Qobuz playlists
 - Spotify playlists
 - TIDAL playlists
 - YouTube Music playlists
@@ -51,11 +52,14 @@ docker-compose logs -f
 
 All runtime configuration is supplied through environment variables in `.env`.
 
-### Getting Credentials
+### Source-specific configuration
 
 **TIDAL**: You need to create an app in the [TIDAL developers portal](https://developer.tidal.com/dashboard) to get a client ID and secret.
 **Deezer**: Public playlists work without a token. For private/restricted access, provide a Deezer user `access_token`.
 **ListenBrainz**: You can get your user token from the [ListenBrainz settings](https://listenbrainz.org/settings/).
+**Qobuz**: No credentials are needed, but only public playlists work.
+**Spotify**: No credentials are needed, but only public playlists work.
+**YouTube Music**: No credentials are needed, but only public playlists work.
 
 ### CSV playlists
 
@@ -73,4 +77,3 @@ GPL-3.0
 
 - [Octo-Fiesta](https://github.com/V1ck3s/octo-fiesta) - The Subsonic API proxy server that inspired this project
 - [Navidrome](https://www.navidrome.org/) - The excellent self-hosted music server
-- [Subsonic API](http://www.subsonic.org/pages/api.jsp) - The API specification

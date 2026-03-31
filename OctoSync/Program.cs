@@ -29,6 +29,7 @@ builder.Services.Configure<SyncOptions>(builder.Configuration.GetSection("SyncSe
 builder.Services.AddTransient<IPlaylistSource, CsvSource>();
 builder.Services.AddHttpClient<IPlaylistSource, TidalSource>();
 builder.Services.AddHttpClient<IPlaylistSource, DeezerSource>();
+builder.Services.AddTransient<IPlaylistSource, QobuzSource>();
 builder.Services.AddHttpClient<IPlaylistSource, ListenBrainzSource>();
 builder.Services.AddHttpClient<IPlaylistSource, SpotifySource>();
 builder.Services.AddHttpClient<IPlaylistSource, YouTubeMusicSource>();

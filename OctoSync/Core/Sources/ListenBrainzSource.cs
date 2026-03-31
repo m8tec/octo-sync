@@ -1,10 +1,10 @@
 using System.Net.Http.Json;
 using System.Text.Json.Nodes;
-using System.Text.RegularExpressions;
 using Microsoft.Extensions.Options;
 using OctoSync.Core.Configuration;
 using OctoSync.Core.Interfaces;
 using OctoSync.Core.Models;
+using OctoSync.Core.Utilities;
 
 namespace OctoSync.Core.Sources;
 
@@ -49,7 +49,7 @@ public sealed class ListenBrainzSource : IPlaylistSource
         var description = playlistNode["annotation"]?.ToString();
         if (!string.IsNullOrWhiteSpace(description))
         {
-            description = StripHtmlTags(description);
+            description = HtmlTextCleaner.StripHtmlTags(description);
         }
 
         return new PlaylistModel
@@ -234,16 +234,6 @@ public sealed class ListenBrainzSource : IPlaylistSource
             SourcePatchWeeklyExploration => "Weekly Exploration",
             _ => throw new InvalidOperationException($"Unsupported source patch '{sourcePatch}'.")
         };
-    }
-
-    /// <summary>
-    /// Remove HTML tags and decode HTML entities
-    /// </summary>
-    private static string StripHtmlTags(string html)
-    {
-        var stripped = Regex.Replace(html, "<[^>]*>", "");
-        stripped = Regex.Replace(stripped, @"\s+", " ");
-        return System.Net.WebUtility.HtmlDecode(stripped).Trim();
     }
 
     private void ValidateOptions()

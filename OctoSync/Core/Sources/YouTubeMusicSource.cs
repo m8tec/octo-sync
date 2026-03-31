@@ -6,20 +6,11 @@ using YouTubeMusicAPI.Client;
 
 namespace OctoSync.Core.Sources;
 
-public sealed class YouTubeMusicSource : IPlaylistSource
+public sealed class YouTubeMusicSource(HttpClient httpClient, IOptions<YouTubeMusicOptions> options, ILogger<YouTubeMusicSource> logger) : IPlaylistSource
 {
-    private readonly HttpClient _httpClient;
-    private readonly YouTubeMusicOptions _options;
-    private readonly ILogger<YouTubeMusicSource> _logger;
+    private readonly YouTubeMusicOptions _options = options.Value;
 
     public string ProviderName => "YouTubeMusic";
-
-    public YouTubeMusicSource(HttpClient httpClient, IOptions<YouTubeMusicOptions> options, ILogger<YouTubeMusicSource> logger)
-    {
-        _httpClient = httpClient;
-        _options = options.Value;
-        _logger = logger;
-    }
 
     public async Task<PlaylistModel> GetPlaylistAsync(string playlistId, CancellationToken cancellationToken)
     {
@@ -29,7 +20,7 @@ public sealed class YouTubeMusicSource : IPlaylistSource
             null,
             null,
             null,
-            _httpClient);
+            httpClient);
 
         var browseId = client.GetCommunityPlaylistBrowseId(playlistId);
         var playlistInfo = await client.GetCommunityPlaylistInfoAsync(browseId, cancellationToken);
@@ -58,7 +49,7 @@ public sealed class YouTubeMusicSource : IPlaylistSource
             throw new InvalidOperationException($"No tracks were returned for YouTube Music playlist '{playlistId}'.");
         }
 
-        _logger.LogInformation("Successfully loaded {TrackCount} tracks from YouTube Music playlist", tracks.Count);
+        logger.LogInformation("Successfully loaded {TrackCount} tracks from YouTube Music playlist", tracks.Count);
 
         return new PlaylistModel
         {
