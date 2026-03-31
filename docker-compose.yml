@@ -17,7 +17,6 @@ services:
       Sources__Tidal__ClientId: ${TIDAL_CLIENT_ID}
       Sources__Tidal__ClientSecret: ${TIDAL_CLIENT_SECRET}
       Sources__Tidal__MaxRequestsPerSecond: ${TIDAL_MAX_REQUESTS_PER_SECOND:-1}
-      Sources__Deezer__AccessToken: ${DEEZER_ACCESS_TOKEN}
       Sources__Deezer__MaxRequestsPerSecond: ${DEEZER_MAX_REQUESTS_PER_SECOND:-1}
       Sources__ListenBrainz__BaseUrl: ${LISTENBRAINZ_BASE_URL:-https://api.listenbrainz.org/1/}
       Sources__ListenBrainz__UserName: ${LISTENBRAINZ_USERNAME}
