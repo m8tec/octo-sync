@@ -27,6 +27,7 @@ public class PlaylistSyncEngine(
         }
 
         var localPlaylistId = await target.EnsurePlaylistExistsAsync(sourcePlaylist, cancellationToken);
+        await target.EnsurePlaylistImageAsync(localPlaylistId, sourcePlaylist.ImageUrl, cancellationToken);
         var targetPlaylist = await target.GetTargetPlaylistAsync(localPlaylistId, cancellationToken);
 
         var unresolvedCount = await PerformDiffingAsync(target, localPlaylistId, sourcePlaylist, targetPlaylist, cancellationToken);

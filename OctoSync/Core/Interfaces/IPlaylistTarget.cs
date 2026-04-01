@@ -11,5 +11,8 @@ public interface IPlaylistTarget
     Task<string?> FindBestMatchAsync(string title, string artist, CancellationToken cancellationToken);
 
     Task AddTrackAsync(string localPlaylistId, string externalTrackId, CancellationToken cancellationToken);
+    
     Task RemoveTrackAsync(string localPlaylistId, string localTrackId, CancellationToken cancellationToken);
+
+    Task EnsurePlaylistImageAsync(string localPlaylistId, string? imageUrl, CancellationToken cancellationToken);
 }

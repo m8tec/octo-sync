@@ -57,6 +57,7 @@ public sealed class ListenBrainzSource : IPlaylistSource
             ExternalId = externalPlaylistId,
             Name = GetStablePlaylistName(sourcePatch),
             Description = description,
+            ImageUrl = null,
             Tracks = tracks
         };
     }

@@ -35,6 +35,8 @@ public class DeezerSource : IPlaylistSource
 
         var playlistName = playlistJson?["title"]?.ToString() ?? "Unknown Playlist";
         var playlistDescription = playlistJson?["description"]?.ToString();
+        var imageUrl = (playlistJson?["picture_xl"] ?? playlistJson?["picture_big"] ?? playlistJson?["picture_medium"] ??
+            playlistJson?["picture_small"] ?? playlistJson?["picture"])?.ToString();
 
         var tracks = new List<TrackModel>();
         ParseTracks(playlistJson?["tracks"]?["data"]?.AsArray(), tracks);
@@ -59,6 +61,7 @@ public class DeezerSource : IPlaylistSource
             ExternalId = playlistId,
             Name = playlistName,
             Description = playlistDescription,
+            ImageUrl = imageUrl,
             Tracks = tracks
         };
     }

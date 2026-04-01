@@ -7,6 +7,7 @@ using OctoSync.Core.Configuration;
 using OctoSync.Core.Interfaces;
 using OctoSync.Core.Matching;
 using OctoSync.Core.Models;
+using OctoSync.Core.Services;
 
 namespace OctoSync.Core.Targets;
 
@@ -14,11 +15,23 @@ public class SubsonicTarget : IPlaylistTarget
 {
     private readonly HttpClient _httpClient;
     private readonly SubsonicOptions _options;
+    private readonly ILogger<SubsonicTarget> _logger;
+    private readonly PlaylistImagePipelineService _imagePipeline;
+    private readonly NavidromePlaylistImageClient _imageClient;
 
-    public SubsonicTarget(HttpClient httpClient, IOptions<SubsonicOptions> options)
+    public SubsonicTarget(
+        HttpClient httpClient,
+        IOptions<SubsonicOptions> options,
+        ILogger<SubsonicTarget> logger,
+        PlaylistImagePipelineService imagePipeline,
+        NavidromePlaylistImageClient imageClient)
     {
         _httpClient = httpClient;
         _options = options.Value;
+        _logger = logger;
+        _imagePipeline = imagePipeline;
+        _imageClient = imageClient;
+
         _httpClient.BaseAddress = new Uri(_options.Url.TrimEnd('/') + "/rest/");
     }
 
@@ -179,4 +192,31 @@ public class SubsonicTarget : IPlaylistTarget
 
         return null;
     }
+
+    public async Task EnsurePlaylistImageAsync(string localPlaylistId, string? imageUrl, CancellationToken cancellationToken)
+    {
+        if (string.IsNullOrWhiteSpace(imageUrl))
+        {
+            return;
+        }
+
+        var preparedImage = await _imagePipeline.TryPrepareImageUploadAsync(_httpClient, imageUrl, cancellationToken);
+        if (preparedImage is null)
+        {
+            return;
+        }
+
+        var uploaded = await _imageClient.UploadPlaylistImageAsync(
+            _httpClient,
+            localPlaylistId,
+            preparedImage.Value.Data,
+            preparedImage.Value.ContentType,
+            cancellationToken);
+
+        if (uploaded)
+        {
+            _logger.LogInformation("Uploaded playlist image");
+        }
+    }
+
 }

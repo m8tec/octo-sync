@@ -104,6 +104,8 @@ public sealed class SpotifySource(HttpClient httpClient, IOptions<SpotifyOptions
             playlistName = playlistId;
         }
 
+        var imageUrl = await TryGetPlaylistImageAsync(page);
+
         var seenTracksByIndex = new SortedDictionary<int, TrackModel>();
         var lastSeenCount = 0;
         var lastProgressTime = DateTime.UtcNow;
@@ -177,6 +179,7 @@ public sealed class SpotifySource(HttpClient httpClient, IOptions<SpotifyOptions
             ExternalId = playlistId,
             Name = playlistName,
             Description = null,
+            ImageUrl = imageUrl,
             Tracks = tracks
         };
     }
@@ -352,5 +355,38 @@ public sealed class SpotifySource(HttpClient httpClient, IOptions<SpotifyOptions
         }";
 
         return await page.EvaluateAsync<string?>(script);
+    }
+
+    private async Task<string?> TryGetPlaylistImageAsync(IPage page)
+    {
+        try
+        {
+            var imageUrl = await page.EvaluateAsync<string?>(@"() => {
+                const playlistImageEl = document.querySelector('[data-testid=""playlist-image""]');
+                if (!playlistImageEl) {
+                    return null;
+                }
+
+                const imgs = playlistImageEl.querySelectorAll('img');
+                for (const img of imgs) {
+                    if (img.src) {
+                        return img.src.trim();
+                    }
+                }
+                
+                return null;
+            }");
+            
+            if (!string.IsNullOrWhiteSpace(imageUrl))
+            {
+                return imageUrl;
+            }
+        }
+        catch (Exception ex)
+        {
+            logger.LogDebug(ex, "Failed to extract playlist image");
+        }
+
+        return null;
     }
 }
