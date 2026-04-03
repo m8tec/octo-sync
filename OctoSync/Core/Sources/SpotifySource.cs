@@ -140,12 +140,8 @@ public sealed class SpotifySource(HttpClient httpClient, IOptions<SpotifyOptions
                 break;
             }
 
-            var rows = await page.QuerySelectorAllAsync("[data-testid=\"tracklist-row\"]");
-            if (rows.Count > 0)
-            {
-                await rows[^1].ScrollIntoViewIfNeededAsync();
-            }
-            else
+            var hasRows = await ScrollToLastTrackRowAsync(page);
+            if (!hasRows)
             {
                 await page.Mouse.WheelAsync(0, 2000);
             }
@@ -329,6 +325,25 @@ public sealed class SpotifySource(HttpClient httpClient, IOptions<SpotifyOptions
         {
             logger.LogError(ex, "Error extracting visible tracks from Spotify page");
         }
+    }
+
+    private static async Task<bool> ScrollToLastTrackRowAsync(IPage page)
+    {
+        var hasTrackRows = await page.EvaluateAsync<bool>("() => document.querySelectorAll('[data-testid=\"tracklist-row\"]').length > 0");
+        if (!hasTrackRows)
+        {
+            return false;
+        }
+
+        await page.EvaluateAsync(@"() => {
+            const rows = document.querySelectorAll('[data-testid=""tracklist-row""]');
+            const lastRow = rows[rows.length - 1];
+            if (lastRow) {
+                lastRow.scrollIntoView({ block: 'end', inline: 'nearest' });
+            }
+        }");
+
+        return true;
     }
 
     private static async Task<string?> TryGetPlaylistNameAsync(IPage page)
