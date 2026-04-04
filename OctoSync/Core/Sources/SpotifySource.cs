@@ -107,6 +107,7 @@ public sealed class SpotifySource(HttpClient httpClient, IOptions<SpotifyOptions
         var seenTracksByIndex = new SortedDictionary<int, TrackModel>();
         var lastSeenCount = 0;
         var lastProgressTime = DateTime.UtcNow;
+        var lastStatusLogTime = DateTime.UtcNow;
         var stallTimeoutSeconds = _options.BrowserStallSeconds;
 
         while (true)
@@ -117,13 +118,13 @@ public sealed class SpotifySource(HttpClient httpClient, IOptions<SpotifyOptions
 
             var currentCount = seenTracksByIndex.Count;
                     
-            if ((DateTime.UtcNow - lastProgressTime).TotalSeconds > 5)
+            if ((DateTime.UtcNow - lastStatusLogTime).TotalSeconds > 5)
             {
                 logger.LogInformation(
                     "Spotify playlist loading: {CurrentCount}/{ExpectedCount} tracks",
                     currentCount,
                     expectedTrackCount?.ToString() ?? "unknown");
-                lastProgressTime = DateTime.UtcNow;
+                lastStatusLogTime = DateTime.UtcNow;
             }
 
             if (currentCount >= expectedTrackCount)
@@ -164,7 +165,7 @@ public sealed class SpotifySource(HttpClient httpClient, IOptions<SpotifyOptions
         var tracks = seenTracksByIndex.Values.ToList();
 
         logger.LogInformation(
-            "Successfully loaded {TrackCount} tracks from Spotify playlist (expected: {ExpectedCount})",
+            "Loaded {TrackCount} tracks from Spotify playlist (expected: {ExpectedCount})",
             tracks.Count,
             expectedTrackCount?.ToString() ?? "unknown");
 
