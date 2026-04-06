@@ -23,6 +23,7 @@ builder.Services.Configure<DeezerOptions>(builder.Configuration.GetSection("Sour
 builder.Services.Configure<ListenBrainzOptions>(builder.Configuration.GetSection("Sources:ListenBrainz"));
 builder.Services.Configure<SpotifyOptions>(builder.Configuration.GetSection("Sources:Spotify"));
 builder.Services.Configure<YouTubeMusicOptions>(builder.Configuration.GetSection("Sources:YouTubeMusic"));
+builder.Services.Configure<AppleMusicOptions>(builder.Configuration.GetSection("Sources:AppleMusic"));
 builder.Services.Configure<SubsonicOptions>(builder.Configuration.GetSection("Subsonic"));
 builder.Services.Configure<SyncOptions>(builder.Configuration.GetSection("SyncSettings"));
 
@@ -33,6 +34,7 @@ builder.Services.AddTransient<IPlaylistSource, QobuzSource>();
 builder.Services.AddHttpClient<IPlaylistSource, ListenBrainzSource>();
 builder.Services.AddHttpClient<IPlaylistSource, SpotifySource>();
 builder.Services.AddHttpClient<IPlaylistSource, YouTubeMusicSource>();
+builder.Services.AddHttpClient<IPlaylistSource, AppleMusicSource>();
 
 builder.Services.AddHttpClient<IPlaylistTarget, SubsonicTarget>(client =>
 {
