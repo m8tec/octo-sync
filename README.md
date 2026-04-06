@@ -27,15 +27,6 @@ See the [Supported Playlist Sources](https://github.com/m8tec/octo-sync/wiki/Sup
 - A running Navidrome instance
 - Playlists you want to mirror :)
 
-### ⚠️ Important: Temporary Setup Requirement
-Until [PR#179](https://github.com/V1ck3s/octo-fiesta/pull/179)  is merged into the `main` branch of Octo-Fiesta, you **must** use the development image of it.
-
-In Octo-Fiesta's docker-compose.yml, update the image line to:
-```yaml
-image: ghcr.io/v1ck3s/octo-fiesta:dev
-```
-
-
 ### Docker Installation (Recommended)
 
 ```bash
