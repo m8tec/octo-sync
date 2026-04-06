@@ -39,6 +39,10 @@ builder.Services.AddHttpClient<IPlaylistTarget, SubsonicTarget>(client =>
     client.Timeout = TimeSpan.FromMinutes(5);
 });
 
+builder.Services.AddTransient<PlaylistImagePipelineService>();
+builder.Services.AddSingleton<NavidromeAuthService>();
+builder.Services.AddTransient<NavidromePlaylistImageClient>();
+
 builder.Services.AddSingleton<ISyncStateManager, SyncStateManager>();
 
 builder.Services.AddTransient<ITrackResolver, TrackResolver>();

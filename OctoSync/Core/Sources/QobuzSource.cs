@@ -18,6 +18,7 @@ public class QobuzSource : IPlaylistSource
 
         string? playlistName = null;
         string? playlistDescription = null;
+        string? imageUrl = null;
         int offset = 0;
         int? total = null;
         var withAuth = false;
@@ -44,6 +45,7 @@ public class QobuzSource : IPlaylistSource
 
             playlistName ??= page.Name;
             playlistDescription ??= page.Description;
+            imageUrl ??= page.ImageRectangle.FirstOrDefault();
 
             var pageItems = page.Tracks?.Items ?? [];
             if (pageItems.Count == 0)
@@ -72,6 +74,7 @@ public class QobuzSource : IPlaylistSource
             ExternalId = playlistId,
             Name = string.IsNullOrWhiteSpace(playlistName) ? "Unknown Playlist" : playlistName,
             Description = HtmlTextCleaner.StripHtmlTags(playlistDescription),
+            ImageUrl = imageUrl,
             Tracks = tracks
         };
     }
