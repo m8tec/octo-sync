@@ -14,6 +14,11 @@ services:
       Subsonic__Username: ${SUBSONIC_USERNAME:-admin}
       Subsonic__Password: ${SUBSONIC_PASSWORD:-admin}
       Sources__AppleMusic__CountryCode: ${APPLEMUSIC_COUNTRY_CODE:-US}
+      Sources__AppleMusic__EnableAnimatedCoverSync: ${APPLEMUSIC_ENABLE_ANIMATED_COVER_SYNC:-true}
+      Sources__AppleMusic__AnimatedArtworkApiBaseUrl: ${APPLEMUSIC_ANIMATED_ARTWORK_API_BASE_URL:-https://artwork.m8tec.top}
+      Sources__AppleMusic__AnimatedMinVariantResolution: ${APPLEMUSIC_ANIMATED_MIN_VARIANT_RESOLUTION:-700}
+      Sources__AppleMusic__AnimatedWebpQuality: ${APPLEMUSIC_ANIMATED_WEBP_QUALITY:-30}
+      Sources__AppleMusic__FfmpegBinaryPath: ${APPLEMUSIC_FFMPEG_BINARY_PATH:-ffmpeg}
       Sources__Csv__BasePath: ${CSV_BASE_PATH:-/playlists}
       Sources__Tidal__ClientId: ${TIDAL_CLIENT_ID}
       Sources__Tidal__ClientSecret: ${TIDAL_CLIENT_SECRET}

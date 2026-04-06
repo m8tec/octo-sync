@@ -14,5 +14,5 @@ public interface IPlaylistTarget
     
     Task RemoveTrackAsync(string localPlaylistId, string localTrackId, CancellationToken cancellationToken);
 
-    Task EnsurePlaylistImageAsync(string localPlaylistId, string? imageUrl, CancellationToken cancellationToken);
+    Task EnsurePlaylistImageAsync(string localPlaylistId, PlaylistModel sourcePlaylist, CancellationToken cancellationToken);
 }

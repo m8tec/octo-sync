@@ -1,4 +1,5 @@
 using System.Net;
+using System.Text.Json;
 using System.Text.RegularExpressions;
 using Microsoft.Extensions.Options;
 using OctoSync.Core.Configuration;
@@ -49,6 +50,7 @@ public sealed class AppleMusicSource(HttpClient httpClient, IOptions<AppleMusicO
             ?? ExtractMetaContent(html, "og:image:secure_url")
             ?? ExtractMetaContent(html, "og:image")
             ?? ExtractMetaContent(html, "twitter:image");
+        var animatedImageUrl = await TryGetAnimatedArtworkUrlAsync(playlistUrl, cancellationToken);
 
         logger.LogInformation("Loaded {TrackCount} tracks", tracks.Count);
 
@@ -58,10 +60,50 @@ public sealed class AppleMusicSource(HttpClient httpClient, IOptions<AppleMusicO
             Name = WebUtility.HtmlDecode(name).Trim(),
             Description = description is null ? null : WebUtility.HtmlDecode(description).Trim(),
             ImageUrl = imageUrl,
+            ImageM3U8Url = animatedImageUrl,
             Tracks = tracks
         };
     }
 
+    private async Task<string?> TryGetAnimatedArtworkUrlAsync(string playlistUrl, CancellationToken cancellationToken)
+    {
+        if (!_options.EnableAnimatedCoverSync)
+        {
+            return null;
+        }
+
+        try
+        {
+            var apiBaseUrl = _options.AnimatedArtworkApiBaseUrl.TrimEnd('/');
+            var requestUrl = $"{apiBaseUrl}/api/v1/artwork/url?url={Uri.EscapeDataString(playlistUrl)}";
+
+            using var response = await httpClient.GetAsync(requestUrl, cancellationToken);
+            if (!response.IsSuccessStatusCode)
+            {
+                logger.LogDebug("Animated artwork API returned HTTP {StatusCode} for {PlaylistUrl}", response.StatusCode, playlistUrl);
+                return null;
+            }
+
+            var responseBody = (await response.Content.ReadAsStringAsync(cancellationToken)).Trim();
+            if (string.IsNullOrWhiteSpace(responseBody))
+            {
+                return null;
+            }
+
+            using var json = JsonDocument.Parse(responseBody);
+            var root = json.RootElement;
+
+            return root.TryGetProperty("url", out var urlElement) && urlElement.ValueKind == JsonValueKind.String
+                ? urlElement.GetString()
+                : null;
+        }
+        catch (Exception ex)
+        {
+            logger.LogDebug(ex, "Failed to fetch animated artwork URL for {PlaylistUrl}", playlistUrl);
+            return null;
+        }
+    }
+    
     private string GetPlaylistUrl(string playlistId)
     {
         var baseUrl = _options.BaseUrl.TrimEnd('/');

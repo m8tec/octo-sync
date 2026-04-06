@@ -27,9 +27,10 @@ public class PlaylistSyncEngine(
         }
 
         var localPlaylistId = await target.EnsurePlaylistExistsAsync(sourcePlaylist, cancellationToken);
-        if (!string.IsNullOrWhiteSpace(sourcePlaylist.ImageUrl))
+        if (!string.IsNullOrWhiteSpace(sourcePlaylist.ImageUrl) ||
+            !string.IsNullOrWhiteSpace(sourcePlaylist.ImageM3U8Url))
         {
-            await target.EnsurePlaylistImageAsync(localPlaylistId, sourcePlaylist.ImageUrl, cancellationToken);
+            await target.EnsurePlaylistImageAsync(localPlaylistId, sourcePlaylist, cancellationToken);
         }
         var targetPlaylist = await target.GetTargetPlaylistAsync(localPlaylistId, cancellationToken);
 

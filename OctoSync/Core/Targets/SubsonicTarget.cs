@@ -193,14 +193,15 @@ public class SubsonicTarget : IPlaylistTarget
         return null;
     }
 
-    public async Task EnsurePlaylistImageAsync(string localPlaylistId, string? imageUrl, CancellationToken cancellationToken)
+    public async Task EnsurePlaylistImageAsync(string localPlaylistId, PlaylistModel sourcePlaylist, CancellationToken cancellationToken)
     {
-        if (string.IsNullOrWhiteSpace(imageUrl))
+        if (string.IsNullOrWhiteSpace(sourcePlaylist.ImageUrl) &&
+            string.IsNullOrWhiteSpace(sourcePlaylist.ImageM3U8Url))
         {
             return;
         }
 
-        var preparedImage = await _imagePipeline.TryPrepareImageUploadAsync(_httpClient, imageUrl, cancellationToken);
+        var preparedImage = await _imagePipeline.TryPrepareImageUploadAsync(_httpClient, sourcePlaylist, cancellationToken);
         if (preparedImage is null)
         {
             return;
