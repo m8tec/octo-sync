@@ -9,6 +9,7 @@ On every cycle, Octo-Sync fetches configured source playlists, resolves tracks i
 ### Supported Playlist Sources
 | Source         | Credentials required       | Private playlists |
 |----------------|----------------------------|-------------------|
+| Apple Music    | No                         | No                |
 | Deezer         | No                         | No                |
 | ListenBrainz   | Yes                        | Yes               |
 | Qobuz          | No                         | No                |
