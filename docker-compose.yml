@@ -13,6 +13,12 @@ services:
       Subsonic__Url: ${SUBSONIC_URL:-http://host.docker.internal:5274}
       Subsonic__Username: ${SUBSONIC_USERNAME:-admin}
       Subsonic__Password: ${SUBSONIC_PASSWORD:-admin}
+      Sources__AppleMusic__CountryCode: ${APPLEMUSIC_COUNTRY_CODE:-US}
+      Sources__AppleMusic__EnableAnimatedCoverSync: ${APPLEMUSIC_ENABLE_ANIMATED_COVER_SYNC:-true}
+      Sources__AppleMusic__AnimatedArtworkApiBaseUrl: ${APPLEMUSIC_ANIMATED_ARTWORK_API_BASE_URL:-https://artwork.m8tec.top}
+      Sources__AppleMusic__AnimatedMinVariantResolution: ${APPLEMUSIC_ANIMATED_MIN_VARIANT_RESOLUTION:-700}
+      Sources__AppleMusic__AnimatedWebpQuality: ${APPLEMUSIC_ANIMATED_WEBP_QUALITY:-30}
+      Sources__AppleMusic__FfmpegBinaryPath: ${APPLEMUSIC_FFMPEG_BINARY_PATH:-ffmpeg}
       Sources__Csv__BasePath: ${CSV_BASE_PATH:-/playlists}
       Sources__Tidal__ClientId: ${TIDAL_CLIENT_ID}
       Sources__Tidal__ClientSecret: ${TIDAL_CLIENT_SECRET}
@@ -24,6 +30,13 @@ services:
       Sources__ListenBrainz__UserAgent: ${LISTENBRAINZ_USER_AGENT:-OctoSync/1.0}
       Sources__YouTubeMusic__GeographicalLocation: ${YTMUSIC_GEO_LOCATION:-US}
       SyncSettings__IntervalMinutes: ${SYNC_INTERVAL_MINUTES:-10}
+      SyncSettings__PlaylistsToSync__AppleMusic__0: ${APPLEMUSIC_PLAYLIST_0}
+      SyncSettings__PlaylistsToSync__AppleMusic__1: ${APPLEMUSIC_PLAYLIST_1}
+      SyncSettings__PlaylistsToSync__AppleMusic__2: ${APPLEMUSIC_PLAYLIST_2}
+      SyncSettings__PlaylistsToSync__AppleMusic__3: ${APPLEMUSIC_PLAYLIST_3}
+      SyncSettings__PlaylistsToSync__AppleMusic__4: ${APPLEMUSIC_PLAYLIST_4}
+      SyncSettings__PlaylistsToSync__AppleMusic__5: ${APPLEMUSIC_PLAYLIST_5}
+      SyncSettings__PlaylistsToSync__AppleMusic__6: ${APPLEMUSIC_PLAYLIST_6}
       SyncSettings__PlaylistsToSync__Deezer__0: ${DEEZER_PLAYLIST_0}
       SyncSettings__PlaylistsToSync__Deezer__1: ${DEEZER_PLAYLIST_1}
       SyncSettings__PlaylistsToSync__Deezer__2: ${DEEZER_PLAYLIST_2}

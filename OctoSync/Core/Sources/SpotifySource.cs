@@ -104,9 +104,12 @@ public sealed class SpotifySource(HttpClient httpClient, IOptions<SpotifyOptions
             playlistName = playlistId;
         }
 
+        var imageUrl = await TryGetPlaylistImageAsync(page);
+
         var seenTracksByIndex = new SortedDictionary<int, TrackModel>();
         var lastSeenCount = 0;
         var lastProgressTime = DateTime.UtcNow;
+        var lastStatusLogTime = DateTime.UtcNow;
         var stallTimeoutSeconds = _options.BrowserStallSeconds;
 
         while (true)
@@ -117,13 +120,13 @@ public sealed class SpotifySource(HttpClient httpClient, IOptions<SpotifyOptions
 
             var currentCount = seenTracksByIndex.Count;
                     
-            if ((DateTime.UtcNow - lastProgressTime).TotalSeconds > 5)
+            if ((DateTime.UtcNow - lastStatusLogTime).TotalSeconds > 5)
             {
                 logger.LogInformation(
                     "Spotify playlist loading: {CurrentCount}/{ExpectedCount} tracks",
                     currentCount,
                     expectedTrackCount?.ToString() ?? "unknown");
-                lastProgressTime = DateTime.UtcNow;
+                lastStatusLogTime = DateTime.UtcNow;
             }
 
             if (currentCount >= expectedTrackCount)
@@ -140,12 +143,8 @@ public sealed class SpotifySource(HttpClient httpClient, IOptions<SpotifyOptions
                 break;
             }
 
-            var rows = await page.QuerySelectorAllAsync("[data-testid=\"tracklist-row\"]");
-            if (rows.Count > 0)
-            {
-                await rows[^1].ScrollIntoViewIfNeededAsync();
-            }
-            else
+            var hasRows = await ScrollToLastTrackRowAsync(page);
+            if (!hasRows)
             {
                 await page.Mouse.WheelAsync(0, 2000);
             }
@@ -168,7 +167,7 @@ public sealed class SpotifySource(HttpClient httpClient, IOptions<SpotifyOptions
         var tracks = seenTracksByIndex.Values.ToList();
 
         logger.LogInformation(
-            "Successfully loaded {TrackCount} tracks from Spotify playlist (expected: {ExpectedCount})",
+            "Loaded {TrackCount} tracks from Spotify playlist (expected: {ExpectedCount})",
             tracks.Count,
             expectedTrackCount?.ToString() ?? "unknown");
 
@@ -177,6 +176,7 @@ public sealed class SpotifySource(HttpClient httpClient, IOptions<SpotifyOptions
             ExternalId = playlistId,
             Name = playlistName,
             Description = null,
+            ImageUrl = imageUrl,
             Tracks = tracks
         };
     }
@@ -331,6 +331,25 @@ public sealed class SpotifySource(HttpClient httpClient, IOptions<SpotifyOptions
         }
     }
 
+    private static async Task<bool> ScrollToLastTrackRowAsync(IPage page)
+    {
+        var hasTrackRows = await page.EvaluateAsync<bool>("() => document.querySelectorAll('[data-testid=\"tracklist-row\"]').length > 0");
+        if (!hasTrackRows)
+        {
+            return false;
+        }
+
+        await page.EvaluateAsync(@"() => {
+            const rows = document.querySelectorAll('[data-testid=""tracklist-row""]');
+            const lastRow = rows[rows.length - 1];
+            if (lastRow) {
+                lastRow.scrollIntoView({ block: 'end', inline: 'nearest' });
+            }
+        }");
+
+        return true;
+    }
+
     private static async Task<string?> TryGetPlaylistNameAsync(IPage page)
     {
         const string script = @"() => {
@@ -352,5 +371,38 @@ public sealed class SpotifySource(HttpClient httpClient, IOptions<SpotifyOptions
         }";
 
         return await page.EvaluateAsync<string?>(script);
+    }
+
+    private async Task<string?> TryGetPlaylistImageAsync(IPage page)
+    {
+        try
+        {
+            var imageUrl = await page.EvaluateAsync<string?>(@"() => {
+                const playlistImageEl = document.querySelector('[data-testid=""playlist-image""]');
+                if (!playlistImageEl) {
+                    return null;
+                }
+
+                const imgs = playlistImageEl.querySelectorAll('img');
+                for (const img of imgs) {
+                    if (img.src) {
+                        return img.src.trim();
+                    }
+                }
+                
+                return null;
+            }");
+            
+            if (!string.IsNullOrWhiteSpace(imageUrl))
+            {
+                return imageUrl;
+            }
+        }
+        catch (Exception ex)
+        {
+            logger.LogDebug(ex, "Failed to extract playlist image");
+        }
+
+        return null;
     }
 }

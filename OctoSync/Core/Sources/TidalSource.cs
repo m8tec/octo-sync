@@ -32,7 +32,7 @@ public class TidalSource : IPlaylistSource
         await EnsureAuthenticatedAsync(cancellationToken);
 
         await ThrottleRequestAsync(cancellationToken);
-        var playlistMetaResponse = await _httpClient.GetAsync($"playlists/{externalPlaylistId}", cancellationToken);
+        var playlistMetaResponse = await _httpClient.GetAsync($"playlists/{externalPlaylistId}?include=coverArt", cancellationToken);
         playlistMetaResponse.EnsureSuccessStatusCode();
 
         var metaJson = await playlistMetaResponse.Content.ReadFromJsonAsync<JsonObject>(cancellationToken: cancellationToken);
@@ -44,6 +44,7 @@ public class TidalSource : IPlaylistSource
                            ?? "Unknown Playlist";
 
         var playlistDesc = metaAttributes?["description"]?.ToString() ?? "";
+        var imageUrl = ExtractImageUrl(metaJson);
 
         var tracks = new List<TrackModel>();
         string? nextUrl = $"playlists/{externalPlaylistId}/relationships/items?page[limit]=100&include=items,items.artists";
@@ -94,6 +95,7 @@ public class TidalSource : IPlaylistSource
             ExternalId = externalPlaylistId,
             Name = playlistName,
             Description = playlistDesc,
+            ImageUrl = imageUrl,
             Tracks = tracks
         };
     }
@@ -221,5 +223,56 @@ public class TidalSource : IPlaylistSource
         {
             _rateLimitGate.Release();
         }
+    }
+
+    private static string? ExtractImageUrl(JsonObject? playlistMeta)
+    {
+        if (playlistMeta is null)
+        {
+            return null;
+        }
+
+        if (playlistMeta["included"] is JsonArray included)
+        {
+            foreach (var node in included)
+            {
+                if (node is null || node["type"]?.ToString() != "artworks")
+                {
+                    continue;
+                }
+
+                if (node["attributes"]?["files"] is not JsonArray files || files.Count == 0)
+                {
+                    continue;
+                }
+
+                string? bestHref = null;
+                var bestHeight = -1;
+
+                foreach (var file in files)
+                {
+                    var href = file?["href"]?.ToString();
+                    if (string.IsNullOrWhiteSpace(href))
+                    {
+                        continue;
+                    }
+
+                    var height = file?["meta"]?["height"]?.GetValue<int?>() ?? 0;
+
+                    if (height > bestHeight)
+                    {
+                        bestHeight = height;
+                        bestHref = href;
+                    }
+                }
+
+                if (!string.IsNullOrWhiteSpace(bestHref))
+                {
+                    return bestHref;
+                }
+            }
+        }
+
+        return null;
     }
 }

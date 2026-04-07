@@ -4,9 +4,12 @@ Sync selected playlists from music services into a Subsonic-compatible server (f
 
 On every cycle, Octo-Sync fetches configured source playlists, resolves tracks in the target library, and updates the target playlist.
 
+<img width="1194" height="808" alt="Playlists Screenshot" src="https://github.com/user-attachments/assets/82aaa84c-cd37-45a4-83ab-3eacfa22e016" />
+
 ### Supported Playlist Sources
 | Source         | Credentials required       | Private playlists |
 |----------------|----------------------------|-------------------|
+| Apple Music    | No                         | No                |
 | Deezer         | No                         | No                |
 | ListenBrainz   | Yes                        | Yes               |
 | Qobuz          | No                         | No                |
@@ -24,15 +27,6 @@ See the [Supported Playlist Sources](https://github.com/m8tec/octo-sync/wiki/Sup
 - Docker Compose (recommended)
 - A running Navidrome instance
 - Playlists you want to mirror :)
-
-### ⚠️ Important: Temporary Setup Requirement
-Until [PR#179](https://github.com/V1ck3s/octo-fiesta/pull/179)  is merged into the `main` branch of Octo-Fiesta, you **must** use the development image of it.
-
-In Octo-Fiesta's docker-compose.yml, update the image line to:
-```yaml
-image: ghcr.io/v1ck3s/octo-fiesta:dev
-```
-
 
 ### Docker Installation (Recommended)
 

@@ -25,6 +25,7 @@ COPY --from=build /ms-playwright /ms-playwright
 RUN apt-get update && \
 	apt-get install -y --no-install-recommends \
 		ca-certificates \
+		ffmpeg \
 		fonts-liberation \
 		libappindicator3-1 \
 		libasound2t64 \

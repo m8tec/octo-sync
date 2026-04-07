@@ -1,4 +1,5 @@
 using System.Net.Http.Json;
+using System.Text.Json;
 using System.Text.Json.Nodes;
 using Microsoft.Extensions.Options;
 using OctoSync.Core.Configuration;
@@ -31,68 +32,102 @@ public class DeezerSource : IPlaylistSource
         playlistResponse.EnsureSuccessStatusCode();
 
         var playlistJson = await playlistResponse.Content.ReadFromJsonAsync<JsonObject>(cancellationToken: cancellationToken);
+        if (playlistJson is null)
+        {
+            throw new InvalidOperationException($"Failed to parse Deezer playlist response for playlist '{playlistId}'.");
+        }
+        
         EnsureNoDeezerError(playlistJson, playlistId);
 
-        var playlistName = playlistJson?["title"]?.ToString() ?? "Unknown Playlist";
-        var playlistDescription = playlistJson?["description"]?.ToString();
+        var playlistName = playlistJson["title"]?.ToString() ?? "Unknown Playlist";
+        var playlistDescription = playlistJson["description"]?.ToString();
+        var imageUrl = (playlistJson["picture_xl"] ?? playlistJson["picture_big"] ?? playlistJson["picture_medium"] ??
+            playlistJson["picture_small"] ?? playlistJson["picture"])?.ToString();
 
-        var tracks = new List<TrackModel>();
-        ParseTracks(playlistJson?["tracks"]?["data"]?.AsArray(), tracks);
-
-        var nextUrl = playlistJson?["tracks"]?["next"]?.ToString();
-
-        while (!string.IsNullOrWhiteSpace(nextUrl))
-        {
-            await ThrottleRequestAsync(cancellationToken);
-            var pageResponse = await _httpClient.GetAsync(nextUrl, cancellationToken);
-            pageResponse.EnsureSuccessStatusCode();
-
-            var pageJson = await pageResponse.Content.ReadFromJsonAsync<JsonObject>(cancellationToken: cancellationToken);
-            EnsureNoDeezerError(pageJson, playlistId);
-
-            ParseTracks(pageJson?["data"]?.AsArray(), tracks);
-            nextUrl = pageJson?["next"]?.ToString();
-        }
+        var tracks = await ParseTracks(playlistJson);
 
         return new PlaylistModel
         {
             ExternalId = playlistId,
             Name = playlistName,
             Description = playlistDescription,
+            ImageUrl = imageUrl,
             Tracks = tracks
         };
     }
 
-    private static void ParseTracks(JsonArray? items, ICollection<TrackModel> tracks)
+    private async Task<List<TrackModel>> ParseTracks(JsonObject playlistJson)
     {
-        if (items is null)
+        var items = new List<JsonObject>();
+
+        // Deezer playlist/{id} embeds at most 400 tracks in tracks.data.
+        // Use the dedicated tracklist endpoint and follow pagination to load all tracks.
+        var tracklistEl = playlistJson["tracklist"];
+        if (tracklistEl is not null && tracklistEl.GetValue<string>().Contains("/tracks"))
         {
-            return;
+            var tracklistUrl = tracklistEl.GetValue<string>();
+            if (!string.IsNullOrWhiteSpace(tracklistUrl))
+            {
+                var nextPageUrl = $"{tracklistUrl}?limit=1000";
+
+                while (!string.IsNullOrWhiteSpace(nextPageUrl))
+                {
+                    var tracklistResponse = await _httpClient.GetAsync(nextPageUrl);
+                    if (!tracklistResponse.IsSuccessStatusCode)
+                    {
+                        break;
+                    }
+
+                    var tracklistJson = await tracklistResponse.Content.ReadAsStringAsync();
+                    using var tracklistDocument = JsonDocument.Parse(tracklistJson);
+                    var tracklistElement = tracklistDocument.RootElement;
+
+                    if (!tracklistElement.TryGetProperty("data", out var pageTracks) || pageTracks.ValueKind != JsonValueKind.Array)
+                    {
+                        break;
+                    }
+
+                    foreach (var pageTrack in pageTracks.EnumerateArray())
+                    {
+                        if (JsonNode.Parse(pageTrack.GetRawText()) is JsonObject trackNode)
+                        {
+                            items.Add(trackNode);
+                        }
+                    }
+
+                    nextPageUrl = tracklistElement.TryGetProperty("next", out var nextEl)
+                        ? nextEl.GetString()
+                        : null;
+                }
+            }
         }
 
+        List<TrackModel> tracks = new();
         foreach (var item in items)
         {
-            var id = item?["id"]?.ToString();
-            var title = item?["title"]?.ToString();
-            var artist = item?["artist"]?["name"]?.ToString();
+            var id = item["id"]?.ToString();
+            var title = item["title"]?.ToString();
+            var artist = item["artist"]?["name"]?.ToString();
 
             if (string.IsNullOrWhiteSpace(id) || string.IsNullOrWhiteSpace(title) || string.IsNullOrWhiteSpace(artist))
             {
                 continue;
             }
 
-            var album = item?["album"]?["title"]?.ToString();
-            var isrc = item?["isrc"]?.ToString();
+            var album = item["album"]?["title"]?.ToString();
+            var isrc = item["isrc"]?.ToString();
 
             tracks.Add(new TrackModel
             {
-                Id = $"ext-deezer-{id}",
+                Id = id,
                 Title = title,
                 Artist = artist,
                 Album = album,
                 Isrc = isrc
             });
         }
+
+        return tracks;
     }
 
     private static void EnsureNoDeezerError(JsonObject? json, string externalPlaylistId)

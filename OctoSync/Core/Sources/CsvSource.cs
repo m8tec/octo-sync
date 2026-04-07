@@ -30,6 +30,7 @@ public sealed class CsvSource(IOptions<CsvOptions> options) : IPlaylistSource, I
             ExternalId = externalPlaylistId,
             Name = string.IsNullOrWhiteSpace(playlistName) ? "CSV Playlist" : playlistName,
             Description = $"Imported from CSV file: {Path.GetFileName(filePath)}",
+            ImageUrl = null,
             Tracks = tracks
         };
     }
