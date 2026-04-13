@@ -12,6 +12,7 @@ On every cycle, Octo-Sync fetches configured source playlists, resolves tracks i
 | Apple Music    | No                         | No                |
 | Deezer         | No                         | No                |
 | ListenBrainz   | Yes                        | Yes               |
+| Last.fm        | No                         | No                |
 | Qobuz          | No                         | No                |
 | Spotify        | No                         | No                |
 | TIDAL          | Yes                        | Yes               |
