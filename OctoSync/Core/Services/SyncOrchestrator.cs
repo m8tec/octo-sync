@@ -8,10 +8,14 @@ public class SyncOrchestrator(
     IEnumerable<IPlaylistSource> sources,
     IPlaylistTarget target,
     IPlaylistSyncEngine syncEngine,
+    IOptions<ListenBrainzOptions> listenBrainzOptions,
+    IOptions<LastFmOptions> lastFmOptions,
     IOptions<SyncOptions> options,
     ILogger<SyncOrchestrator> logger) : ISyncOrchestrator
 {
     private readonly SyncOptions _options = options.Value;
+    private readonly ListenBrainzOptions _listenBrainzOptions = listenBrainzOptions.Value;
+    private readonly LastFmOptions _lastFmOptions = lastFmOptions.Value;
 
     public async Task RunCycleAsync(CancellationToken cancellationToken)
     {
@@ -59,6 +63,12 @@ public class SyncOrchestrator(
 
     private async Task<IReadOnlyList<string>> ResolvePlaylistIdsAsync(IPlaylistSource source, CancellationToken cancellationToken)
     {
+        if (!IsSourceEnabled(source))
+        {
+            logger.LogDebug("Skipping {Provider} because required credentials are not configured.", source.ProviderName);
+            return Array.Empty<string>();
+        }
+
         if (_options.PlaylistsToSync.TryGetValue(source.ProviderName, out var configuredPlaylistIds))
         {
             var configured = configuredPlaylistIds
@@ -78,6 +88,16 @@ public class SyncOrchestrator(
         }
 
         return Array.Empty<string>();
+    }
+
+    private bool IsSourceEnabled(IPlaylistSource source)
+    {
+        return source.ProviderName switch
+        {
+            "ListenBrainz" => !string.IsNullOrWhiteSpace(_listenBrainzOptions.UserName),
+            "LastFm" => !string.IsNullOrWhiteSpace(_lastFmOptions.UserName),
+            _ => true
+        };
     }
 
     private static bool IsExpectedOperationalException(Exception ex)
