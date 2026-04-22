@@ -19,6 +19,7 @@ services:
       Sources__AppleMusic__AnimatedMinVariantResolution: ${APPLEMUSIC_ANIMATED_MIN_VARIANT_RESOLUTION:-700}
       Sources__AppleMusic__AnimatedWebpQuality: ${APPLEMUSIC_ANIMATED_WEBP_QUALITY:-30}
       Sources__AppleMusic__FfmpegBinaryPath: ${APPLEMUSIC_FFMPEG_BINARY_PATH:-ffmpeg}
+      Image__MaxImageSizeMb: ${IMAGE_MAX_IMAGE_SIZE_MB:-10}
       Sources__LastFm__UserName: ${LASTFM_USERNAME}
       Sources__Csv__BasePath: ${CSV_BASE_PATH:-/playlists}
       Sources__Tidal__ClientId: ${TIDAL_CLIENT_ID}

@@ -25,6 +25,7 @@ builder.Services.Configure<LastFmOptions>(builder.Configuration.GetSection("Sour
 builder.Services.Configure<SpotifyOptions>(builder.Configuration.GetSection("Sources:Spotify"));
 builder.Services.Configure<YouTubeMusicOptions>(builder.Configuration.GetSection("Sources:YouTubeMusic"));
 builder.Services.Configure<AppleMusicOptions>(builder.Configuration.GetSection("Sources:AppleMusic"));
+builder.Services.Configure<ImageOptions>(builder.Configuration.GetSection("Image"));
 builder.Services.Configure<SubsonicOptions>(builder.Configuration.GetSection("Subsonic"));
 builder.Services.Configure<SyncOptions>(builder.Configuration.GetSection("SyncSettings"));
 
