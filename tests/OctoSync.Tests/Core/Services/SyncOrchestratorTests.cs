@@ -31,6 +31,8 @@ public class SyncOrchestratorTests
             [source],
             targetMock.Object,
             syncEngineMock.Object,
+            Options.Create(new ListenBrainzOptions()),
+            Options.Create(new LastFmOptions()),
             Options.Create(options),
             loggerMock.Object);
 
@@ -65,6 +67,8 @@ public class SyncOrchestratorTests
             [source],
             targetMock.Object,
             syncEngineMock.Object,
+            Options.Create(new ListenBrainzOptions()),
+            Options.Create(new LastFmOptions()),
             Options.Create(options),
             loggerMock.Object);
 
@@ -92,6 +96,8 @@ public class SyncOrchestratorTests
             [source],
             targetMock.Object,
             syncEngineMock.Object,
+            Options.Create(new ListenBrainzOptions()),
+            Options.Create(new LastFmOptions()),
             Options.Create(options),
             loggerMock.Object);
 
@@ -123,6 +129,8 @@ public class SyncOrchestratorTests
             [source],
             targetMock.Object,
             syncEngineMock.Object,
+            Options.Create(new ListenBrainzOptions()),
+            Options.Create(new LastFmOptions()),
             Options.Create(options),
             loggerMock.Object);
 
@@ -134,6 +142,32 @@ public class SyncOrchestratorTests
         syncEngineMock.Verify(
             x => x.ProcessPlaylistAsync(source, "pl-2", targetMock.Object, It.IsAny<CancellationToken>()),
             Times.Once);
+    }
+
+    [Fact]
+    public async Task RunCycleAsync_SkipsLastFm_WhenUsernameMissing()
+    {
+        var source = new TestPlaylistSource("LastFm");
+        var options = CreateOptions(("LastFm", ["mix", "recommended"]));
+
+        var targetMock = new Mock<IPlaylistTarget>(MockBehavior.Strict);
+        var syncEngineMock = new Mock<IPlaylistSyncEngine>(MockBehavior.Strict);
+        var loggerMock = new Mock<ILogger<SyncOrchestrator>>();
+
+        var orchestrator = new SyncOrchestrator(
+            [source],
+            targetMock.Object,
+            syncEngineMock.Object,
+            Options.Create(new ListenBrainzOptions()),
+            Options.Create(new LastFmOptions()),
+            Options.Create(options),
+            loggerMock.Object);
+
+        await orchestrator.RunCycleAsync(CancellationToken.None);
+
+        syncEngineMock.Verify(
+            x => x.ProcessPlaylistAsync(It.IsAny<IPlaylistSource>(), It.IsAny<string>(), It.IsAny<IPlaylistTarget>(), It.IsAny<CancellationToken>()),
+            Times.Never);
     }
     
     private static SyncOptions CreateOptions(params (string Provider, string[] PlaylistIds)[] entries)

@@ -9,14 +9,17 @@ namespace OctoSync.Core.Services;
 
 public class PlaylistImagePipelineService(
     IOptions<AppleMusicOptions> appleMusicOptions,
+    IOptions<ImageOptions> imageOptions,
     ILogger<PlaylistImagePipelineService> logger)
 {
     private sealed record VariantCandidate(Uri Uri, int Width, int Height);
 
     private readonly AppleMusicOptions _appleMusicOptions = appleMusicOptions.Value;
+    private readonly ImageOptions _imageOptions = imageOptions.Value;
 
-    private const long MaxImageSizeBytes = 10 * 1024 * 1024;
     private const string SourceUserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36";
+
+    private long MaxImageSizeBytes => Math.Max(1, _imageOptions.MaxImageSizeMb) * 1024L * 1024L;
 
     public async Task<(byte[] Data, string ContentType)?> TryPrepareImageUploadAsync(
         HttpClient httpClient,
@@ -77,7 +80,7 @@ public class PlaylistImagePipelineService(
 
                 if (data.Length > MaxImageSizeBytes)
                 {
-                    logger.LogWarning("Animated cover exceeds size limit after conversion: {Size} bytes", data.Length);
+                    logger.LogWarning("Animated cover exceeds size limit: {Size} bytes > {MaxSizeBytes} bytes", data.Length, MaxImageSizeBytes);
                     return null;
                 }
 
@@ -125,8 +128,8 @@ public class PlaylistImagePipelineService(
 
             if (imageData.Length > MaxImageSizeBytes)
             {
-                logger.LogWarning("Playlist image exceeds size limit: {Size} bytes from {ImageUrl}",
-                    imageData.Length, imageUrl);
+                logger.LogWarning("Playlist image exceeds size limit: {Size} bytes > {MaxSizeBytes} bytes from {ImageUrl}",
+                    imageData.Length, MaxImageSizeBytes, imageUrl);
                 return null;
             }
 

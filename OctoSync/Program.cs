@@ -21,9 +21,11 @@ builder.Services.Configure<CsvOptions>(builder.Configuration.GetSection("Sources
 builder.Services.Configure<TidalOptions>(builder.Configuration.GetSection("Sources:Tidal"));
 builder.Services.Configure<DeezerOptions>(builder.Configuration.GetSection("Sources:Deezer"));
 builder.Services.Configure<ListenBrainzOptions>(builder.Configuration.GetSection("Sources:ListenBrainz"));
+builder.Services.Configure<LastFmOptions>(builder.Configuration.GetSection("Sources:LastFm"));
 builder.Services.Configure<SpotifyOptions>(builder.Configuration.GetSection("Sources:Spotify"));
 builder.Services.Configure<YouTubeMusicOptions>(builder.Configuration.GetSection("Sources:YouTubeMusic"));
 builder.Services.Configure<AppleMusicOptions>(builder.Configuration.GetSection("Sources:AppleMusic"));
+builder.Services.Configure<ImageOptions>(builder.Configuration.GetSection("Image"));
 builder.Services.Configure<SubsonicOptions>(builder.Configuration.GetSection("Subsonic"));
 builder.Services.Configure<SyncOptions>(builder.Configuration.GetSection("SyncSettings"));
 
@@ -32,6 +34,7 @@ builder.Services.AddHttpClient<IPlaylistSource, TidalSource>();
 builder.Services.AddHttpClient<IPlaylistSource, DeezerSource>();
 builder.Services.AddTransient<IPlaylistSource, QobuzSource>();
 builder.Services.AddHttpClient<IPlaylistSource, ListenBrainzSource>();
+builder.Services.AddHttpClient<IPlaylistSource, LastFmSource>();
 builder.Services.AddHttpClient<IPlaylistSource, SpotifySource>();
 builder.Services.AddHttpClient<IPlaylistSource, YouTubeMusicSource>();
 builder.Services.AddHttpClient<IPlaylistSource, AppleMusicSource>();
