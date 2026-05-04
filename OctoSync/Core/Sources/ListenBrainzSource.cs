@@ -57,7 +57,7 @@ public sealed class ListenBrainzSource : IPlaylistSource
             ExternalId = externalPlaylistId,
             Name = GetStablePlaylistName(sourcePatch),
             Description = description,
-            ImageUrl = null,
+            ImageUrl = GetDefaultImageUrl(sourcePatch),
             Tracks = tracks
         };
     }
@@ -235,6 +235,18 @@ public sealed class ListenBrainzSource : IPlaylistSource
             SourcePatchWeeklyExploration => "Weekly Exploration",
             _ => throw new InvalidOperationException($"Unsupported source patch '{sourcePatch}'.")
         };
+    }
+
+    private string? GetDefaultImageUrl(string sourcePatch)
+    {
+        var imagePath = sourcePatch switch
+        {
+            SourcePatchDailyJams => _options.DailyJamsImagePath,
+            SourcePatchWeeklyExploration => _options.WeeklyExplorationImagePath,
+            _ => null
+        };
+
+        return string.IsNullOrWhiteSpace(imagePath) ? null : imagePath;
     }
 
     private void ValidateOptions()
