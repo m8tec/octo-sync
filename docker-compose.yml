@@ -30,6 +30,8 @@ services:
       Sources__ListenBrainz__UserName: ${LISTENBRAINZ_USERNAME}
       Sources__ListenBrainz__UserToken: ${LISTENBRAINZ_TOKEN}
       Sources__ListenBrainz__UserAgent: ${LISTENBRAINZ_USER_AGENT:-OctoSync/1.0}
+      Sources__ListenBrainz__DailyJamsImagePath: ${LISTENBRAINZ_DAILY_JAMS_IMAGE_PATH:-Assets/DefaultCovers/ListenBrainz/DailyJams.png}
+      Sources__ListenBrainz__WeeklyExplorationImagePath: ${LISTENBRAINZ_WEEKLY_EXPLORATION_IMAGE_PATH:-Assets/DefaultCovers/ListenBrainz/WeeklyExploration.png}
       Sources__YouTubeMusic__GeographicalLocation: ${YTMUSIC_GEO_LOCATION:-US}
       SyncSettings__IntervalMinutes: ${SYNC_INTERVAL_MINUTES:-10}
       SyncSettings__PlaylistsToSync__AppleMusic__0: ${APPLEMUSIC_PLAYLIST_0}

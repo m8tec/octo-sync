@@ -40,7 +40,12 @@ public class PlaylistImagePipelineService(
             return null;
         }
 
-        return await TryPrepareStaticImageUploadAsync(httpClient, sourcePlaylist.ImageUrl, cancellationToken);
+        if (IsRemoteUrl(sourcePlaylist.ImageUrl))
+        {
+            return await TryPrepareStaticImageUploadAsync(httpClient, sourcePlaylist.ImageUrl, cancellationToken);
+        }
+
+        return await TryPrepareLocalImageUploadAsync(sourcePlaylist.ImageUrl, cancellationToken);
     }
 
     private async Task<(byte[] Data, string ContentType)?> TryPrepareAnimatedImageUploadAsync(
@@ -157,6 +162,66 @@ public class PlaylistImagePipelineService(
             logger.LogDebug(ex, "Unexpected error handling playlist image for {ImageUrl}", imageUrl);
             return null;
         }
+    }
+
+    private async Task<(byte[] Data, string ContentType)?> TryPrepareLocalImageUploadAsync(
+        string imagePath,
+        CancellationToken cancellationToken)
+    {
+        try
+        {
+            var resolvedPath = imagePath;
+            if (!Path.IsPathRooted(resolvedPath))
+            {
+                resolvedPath = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, resolvedPath));
+            }
+
+            if (!File.Exists(resolvedPath))
+            {
+                logger.LogWarning("Local playlist image not found: {ImagePath}", imagePath);
+                return null;
+            }
+
+            var imageData = await File.ReadAllBytesAsync(resolvedPath, cancellationToken);
+            if (imageData.Length == 0)
+            {
+                logger.LogWarning("Local playlist image is empty: {ImagePath}", imagePath);
+                return null;
+            }
+
+            if (imageData.Length > MaxImageSizeBytes)
+            {
+                logger.LogWarning("Local playlist image exceeds size limit: {Size} bytes > {MaxSizeBytes} bytes from {ImagePath}",
+                    imageData.Length, MaxImageSizeBytes, imagePath);
+                return null;
+            }
+
+            var contentType = ImageMimeTypeDetector.Detect(imageData);
+            if (contentType == "application/octet-stream")
+            {
+                logger.LogWarning("Local image format not supported by Navidrome: {ImagePath}", imagePath);
+                return null;
+            }
+
+            return (imageData, contentType);
+        }
+        catch (OperationCanceledException)
+        {
+            logger.LogWarning("Local image read cancelled for {ImagePath}", imagePath);
+            return null;
+        }
+        catch (Exception ex)
+        {
+            logger.LogWarning(ex, "Unexpected error handling local playlist image for {ImagePath}", imagePath);
+            return null;
+        }
+    }
+
+    private static bool IsRemoteUrl(string url)
+    {
+        if (string.IsNullOrWhiteSpace(url)) return false;
+        if (!Uri.TryCreate(url, UriKind.Absolute, out var uri)) return false;
+        return uri.Scheme == Uri.UriSchemeHttp || uri.Scheme == Uri.UriSchemeHttps;
     }
 
     private async Task<VariantCandidate> ResolvePreferredVariantAsync(
