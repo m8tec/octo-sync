@@ -45,7 +45,7 @@ public sealed class LastFmSource(HttpClient httpClient, IOptions<LastFmOptions> 
             ExternalId = playlistId,
             Name = title,
             Description = $"{title} from Last.fm for {_options.UserName}",
-            ImageUrl = null,
+            ImageUrl = GetDefaultImageUrl(playlistId),
             Tracks = tracks
         };
     }
@@ -100,5 +100,15 @@ public sealed class LastFmSource(HttpClient httpClient, IOptions<LastFmOptions> 
         }
 
         return string.Concat(parts.Select(part => char.ToUpperInvariant(part[0]) + part[1..].ToLowerInvariant()));
+    }
+
+    private string? GetDefaultImageUrl(string playlistId)
+    {
+        return playlistId.ToLowerInvariant() switch
+        {
+            "mix" => _options.MixImagePath,
+            "recommended" => _options.RecommendedImagePath,
+            _ => null
+        };
     }
 }
