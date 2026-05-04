@@ -21,6 +21,8 @@ services:
       Sources__AppleMusic__FfmpegBinaryPath: ${APPLEMUSIC_FFMPEG_BINARY_PATH:-ffmpeg}
       Image__MaxImageSizeMb: ${IMAGE_MAX_IMAGE_SIZE_MB:-10}
       Sources__LastFm__UserName: ${LASTFM_USERNAME}
+      Sources__LastFm__MixImagePath: ${LASTFM_MIX_IMAGE_PATH:-Assets/DefaultCovers/LastFm/Mix.png}
+      Sources__LastFm__RecommendedImagePath: ${LASTFM_RECOMMENDED_IMAGE_PATH:-Assets/DefaultCovers/LastFm/Recommended.png}
       Sources__Csv__BasePath: ${CSV_BASE_PATH:-/playlists}
       Sources__Tidal__ClientId: ${TIDAL_CLIENT_ID}
       Sources__Tidal__ClientSecret: ${TIDAL_CLIENT_SECRET}
