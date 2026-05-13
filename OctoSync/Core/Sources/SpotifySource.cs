@@ -72,6 +72,7 @@ public sealed class SpotifySource(HttpClient httpClient, IOptions<SpotifyOptions
         var context = await browser.NewContextAsync(new BrowserNewContextOptions
         {
             UserAgent = _options.UserAgent,
+            Locale = string.IsNullOrWhiteSpace(_options.Locale) ? "en-US" : _options.Locale,
             ViewportSize = new ViewportSize { Width = 1280, Height = 800 }
         });
 
